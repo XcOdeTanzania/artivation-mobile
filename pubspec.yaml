@@ -1,0 +1,80 @@
+name: artivation
+description: A new Flutter project.
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# Read more about versioning at semver.org.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^0.1.2
+  scoped_model: ^1.0.1
+  http: ^0.12.0+1
+  flutter_image: ^1.0.0
+  barcode_scan: ^0.0.8
+  url_launcher: ^4.0.3
+  font_awesome_flutter: ^8.2.0
+  shared_preferences: ^0.4.3
+  rxdart: ^0.20.0
+  liquid_pull_to_refresh: ^1.0.2
+  flutter_rating: ^0.0.2
+  intl: ^0.15.7
+  flutter_launcher_icons: ^0.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter_icons:
+  android: "launcher_icon" 
+  ios: true
+  image_path: "assets/icon/icon.png"
+
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+      - assets/kalimwenjuma.jpg
+      - assets/robbyn.jpg
+      - assets/transparent.png
+      - assets/saida.jpg
+      - assets/img/animals/animal1.jpeg
+      - assets/img/animals/animal2.jpeg
+      - assets/img/animals/animal3.jpeg
+      - assets/img/animals/animal4.jpeg
+      - assets/img/animals/animal5.jpeg
+      - assets/img/animals/animal6.jpeg
+      - assets/img/animals/animal7.jpeg
+      - assets/img/beaches/beach1.jpeg
+      - assets/img/beaches/beach2.jpeg
+      - assets/img/beaches/beach3.jpeg
+      - assets/img/beaches/beach4.jpeg
+      - assets/img/beaches/beach5.jpeg
+      
+
+
+
+
+  fonts:
+    - family: WorkSansSemiBold
+      fonts:
+        - asset: assets/fonts/Work_Sans/WorkSans-SemiBold.ttf
+
+    - family: WorkSansBold
+      fonts:
+        - asset: assets/fonts/Work_Sans/WorkSans-Bold.ttf
+
+    - family: WorkSansMedium
+      fonts:
+        - asset: assets/fonts/Work_Sans/WorkSans-Medium.ttf
