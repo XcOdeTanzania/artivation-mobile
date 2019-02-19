@@ -1,9 +1,9 @@
-import 'package:artivation/models/product.dart';
 import 'package:artivation/scoped-models/main.dart';
+import 'package:artivation/ui/widgets/cart/shopping_cart_row.dart';
+import 'package:artivation/ui/widgets/cart/shopping_cart_summary.dart';
 import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'package:intl/intl.dart';
 
 const double _leftColumnWidth = 60.0;
 
@@ -14,11 +14,11 @@ class ShoppingCartPage extends StatefulWidget {
 
 class _ShoppingCartPageState extends State<ShoppingCartPage> {
   List<Widget> _createShoppingCartRows(MainModel model) {
-    return model.productsInCart.keys
+    return model.piecesInCart.keys
         .map(
           (int id) => ShoppingCartRow(
-                product: model.getProductById(id),
-                quantity: model.productsInCart[id],
+                piece: model.getPieceById(id),
+                quantity: model.piecesInCart[id],
                 onPressed: () {
                   model.removeItemFromCart(id);
                 },
@@ -44,11 +44,13 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 children: <Widget>[
                   ListView(
                     children: <Widget>[
-                      Row(   
+                      Row(
                         children: <Widget>[
                           SizedBox(
                             width: _leftColumnWidth,
-                            child: Padding(padding: EdgeInsets.only(top: 40),),
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 40),
+                            ),
                           ),
                           SizedBox(
                               width: _leftColumnWidth,
@@ -74,14 +76,15 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                     left: 16.0,
                     right: 16.0,
                     child: RaisedButton(
-                      shape: const BeveledRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                      ),
                       color: UIData.primaryColor,
                       splashColor: UIData.secondaryColor,
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12.0),
-                        child: Text('CHECK OUT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                        child: Text(
+                          'CHECK OUT',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
                       ),
                       onPressed: () {
                         model.clearCart();
@@ -93,171 +96,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
             },
           ),
         ),
-      ),
-    );
-  }
-}
-
-class ShoppingCartSummary extends StatelessWidget {
-  const ShoppingCartSummary({this.model});
-
-  final MainModel model;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle =
-        Theme.of(context).textTheme.body1.copyWith(color: UIData.primaryColor);
-    final TextStyle largeAmountStyle = Theme.of(context).textTheme.display1;
-    final NumberFormat formatter = NumberFormat.simpleCurrency(
-      decimalDigits: 2,
-      locale: Localizations.localeOf(context).toString(),
-    );
-
-    return Row(
-      children: <Widget>[
-        const SizedBox(width: _leftColumnWidth),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    const Expanded(
-                      child: Text('TOTAL'),
-                    ),
-                    Text(
-                      formatter.format(model.totalCost),
-                      style: largeAmountStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                Row(
-                  children: <Widget>[
-                    const Expanded(
-                      child: Text('Subtotal:'),
-                    ),
-                    Text(
-                      formatter.format(model.subtotalCost),
-                      style: smallAmountStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4.0),
-                Row(
-                  children: <Widget>[
-                    const Expanded(
-                      child: Text('Shipping:'),
-                    ),
-                    Text(
-                      formatter.format(model.shippingCost),
-                      style: smallAmountStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4.0),
-                Row(
-                  children: <Widget>[
-                    const Expanded(
-                      child: Text('Tax:'),
-                    ),
-                    Text(
-                      formatter.format(model.tax),
-                      style: smallAmountStyle,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class ShoppingCartRow extends StatelessWidget {
-  const ShoppingCartRow({
-    @required this.product,
-    @required this.quantity,
-    this.onPressed,
-  });
-
-  final Product product;
-  final int quantity;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final NumberFormat formatter = NumberFormat.simpleCurrency(
-      decimalDigits: 0,
-      locale: Localizations.localeOf(context).toString(),
-    );
-    final ThemeData localTheme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        key: ValueKey<int>(product.id),
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(
-            width: _leftColumnWidth,
-            child: IconButton(
-              icon: const Icon(Icons.remove_circle_outline),
-              onPressed: onPressed,
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Image.asset(
-                        product.assetName,
-                        package: product.assetPackage,
-                        fit: BoxFit.cover,
-                        width: 75.0,
-                        height: 75.0,
-                      ),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Text('Quantity: $quantity'),
-                                ),
-                                Text('x ${formatter.format(product.price)}'),
-                              ],
-                            ),
-                            Text(
-                              product.name,
-                              style: localTheme.textTheme.subhead
-                                  .copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16.0),
-                  const Divider(
-                    color: UIData.secondaryColor,
-                    height: 10.0,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

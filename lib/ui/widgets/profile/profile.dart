@@ -1,26 +1,33 @@
+import 'package:artivation/models/artist.dart';
 import 'package:artivation/ui/pages/gallery_page.dart';
 import 'package:artivation/ui/widgets/profile/chip_tile.dart';
 import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 
-const List<String> _defaultMaterials = <String>[
-  'People',
-  'Animation',
-  'Nature',
-  'grafiti',
-  'Love',
-];
+// const List<String> _defaultMaterials = <String>[
+//   'People',
+//   'Animation',
+//   'Nature',
+//   'grafiti',
+//   'Love',
+// ];
 
 class Profile extends StatefulWidget {
+  final Artist artist;
+  
+
+  const Profile({Key key, this.artist}) : super(key: key); 
   @override
   ProfileState createState() {
-    return new ProfileState();
+    return new ProfileState(artist);
   }
 }
 
 class ProfileState extends State<Profile> {
-  ProfileState() {
+  List<String> cats;
+  final Artist myArtist;
+  ProfileState(this.myArtist) {
     _reset();
   }
   final Set<String> _materials = Set<String>();
@@ -31,6 +38,12 @@ class ProfileState extends State<Profile> {
 
   void _reset() {
     _materials.clear();
+    List<String> _defaultMaterials = <String>[
+      myArtist.categories[0].toString().replaceAll('Category.', ''),
+      myArtist.categories[1].toString().replaceAll('Category.', ''),
+      myArtist.categories[2].toString().replaceAll('Category.', ''),
+    ];
+   
     _materials.addAll(_defaultMaterials);
   }
 
@@ -82,7 +95,7 @@ class ProfileState extends State<Profile> {
         ),
         child: StarRating(
           size: 50.0,
-          rating: rating,
+          rating: widget.artist.ratings,
           color: Colors.orange,
           borderColor: Colors.grey,
           starCount: starCount,
@@ -111,11 +124,11 @@ class ProfileState extends State<Profile> {
             Center(
               child: CircleAvatar(
                 radius: MediaQuery.of(context).size.width / 8,
-                backgroundImage: AssetImage('assets/kalimwenjuma.jpg'),
+                backgroundImage: AssetImage(widget.artist.avatar),
               ),
             ),
             Text(
-              'John Joel',
+              widget.artist.name,
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

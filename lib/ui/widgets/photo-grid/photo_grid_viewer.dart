@@ -1,13 +1,14 @@
-import 'package:artivation/models/photo.dart';
+
+import 'package:artivation/models/piece.dart';
 import 'package:flutter/material.dart';
 
 const double _kMinFlingVelocity = 800.0;
 
 
 class GridPhotoViewer extends StatefulWidget {
-  const GridPhotoViewer({ Key key, this.photo }) : super(key: key);
+  const GridPhotoViewer({ Key key, this.piece }) : super(key: key);
 
-  final Photo photo;
+  final Piece piece;
 
   @override
   _GridPhotoViewerState createState() => _GridPhotoViewerState();
@@ -94,8 +95,8 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
             ..translate(_offset.dx, _offset.dy)
             ..scale(_scale),
           child: Image.asset(
-            widget.photo.assetName,
-            fit: BoxFit.cover,
+            widget.piece.image,
+            fit: BoxFit.contain,
           ),
         ),
       ),

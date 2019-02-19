@@ -289,7 +289,8 @@ class _LoginPageState extends State<LoginPage>
                                 suffixIcon: GestureDetector(
                                   onTap: _toggleLogin,
                                   child: Icon(
-                                    FontAwesomeIcons.eye,
+                                    _obscureTextLogin?
+                                    FontAwesomeIcons.eye :FontAwesomeIcons.eyeSlash,
                                     size: 15.0,
                                     color: Colors.black,
                                   ),
@@ -570,7 +571,8 @@ class _LoginPageState extends State<LoginPage>
                                 suffixIcon: GestureDetector(
                                   onTap: _toggleSignup,
                                   child: Icon(
-                                    FontAwesomeIcons.eye,
+                                    _obscureTextSignup ?
+                                    FontAwesomeIcons.eye:FontAwesomeIcons.eyeSlash,
                                     size: 15.0,
                                     color: Colors.black,
                                   ),
@@ -609,7 +611,8 @@ class _LoginPageState extends State<LoginPage>
                                 suffixIcon: GestureDetector(
                                   onTap: _toggleSignupConfirm,
                                   child: Icon(
-                                    FontAwesomeIcons.eye,
+                                    _obscureTextSignupConfirm ?
+                                    FontAwesomeIcons.eye:FontAwesomeIcons.eyeSlash,
                                     size: 15.0,
                                     color: Colors.black,
                                   ),

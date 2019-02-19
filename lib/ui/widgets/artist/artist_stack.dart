@@ -1,13 +1,14 @@
+import 'package:artivation/models/artist.dart';
 import 'package:artivation/ui/widgets/profile/profile.dart';
 import 'package:artivation/ui/widgets/profile/profile_tile.dart';
 import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
 
-Widget stackView(BuildContext context){
+Widget stackView(BuildContext context, Artist artist){
 return Stack(
           fit: StackFit.expand,
           children: <Widget>[
-            Profile(),
+            Profile(artist: artist,),
             Card(
                 elevation: 4.0,
                 margin: EdgeInsets.only(
@@ -25,7 +26,7 @@ return Stack(
                       FlatButton(
                         child: ProfileTile(
                           title: 'Pieces',
-                          subtitle: "54",
+                          subtitle: artist.numberOfPieces.toString(),
                           iconColor: Colors.white,
                         ),
                         onPressed: () {},
@@ -33,7 +34,7 @@ return Stack(
                       FlatButton(
                         child: ProfileTile(
                           title: 'Bought',
-                          subtitle: "18",
+                          subtitle: artist.numberOfPiecesBought.toString(),
                           iconColor: Colors.white,
                         ),
                         onPressed: () {},
@@ -41,7 +42,7 @@ return Stack(
                       FlatButton(
                         child: ProfileTile(
                           title: 'Likes',
-                          subtitle: "12",
+                          subtitle: artist.numberOfLikes.toString(),
                           iconColor: Colors.white,
                         ),
                         onPressed: () {},

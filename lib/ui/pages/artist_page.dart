@@ -5,27 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
-const String _kAsset0 = 'assets/robbyn.jpg';
+
 
 class ArtistPage extends StatefulWidget {
   final MainModel model;
 
   ArtistPage(this.model);
 
-  static const List<String> _artistListContents = <String>[
-    'John Paul',
-    'Ally Labby',
-    'Henry Pox',
-    'Danny Inch',
-    'Eliliana Naps',
-    'Fanuel Osbert',
-    'John Paul',
-    'Ally Labby',
-    'Henry Pox',
-    'Danny Inch',
-    'Eliliana Naps',
-    'Fanuel Osbert',
-  ];
 
   @override
   _ArtistState createState() => _ArtistState();
@@ -45,38 +31,58 @@ class _ArtistState extends State<ArtistPage> {
       children: <Widget>[Center(child: Text('No Artist Found!'))],
     );
 
-    Widget _buildListOfArtists(MainModel model) => ListView(
-          shrinkWrap: true,
-          primary: false,
+    Widget _buildListOfArtists(MainModel model) => ListView.builder(
           padding: EdgeInsets.all(8.0),
-          children: ArtistPage._artistListContents.map<Widget>((String id) {
-            return MergeSemantics(
-              child: ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.all(16.0),
-                leading: CircleAvatar(
-                  radius: 36.0,
-                  backgroundImage: AssetImage(_kAsset0),
+          shrinkWrap: true,
+          itemCount: model.getArtists().length,
+          itemBuilder: (context, index) {
+            return Container(
+              child: MergeSemantics(
+                child: ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.all(16.0),
+                  leading: CircleAvatar(
+                    radius: 36.0,
+                    backgroundImage:
+                        AssetImage(model.getArtists()[index].avatar),
+                  ),
+                  title: Text(model.getArtists()[index].name),
+                  subtitle: Text(model
+                          .getArtists()[index]
+                          .categories[0]
+                          .toString()
+                          .replaceAll('Category.', '') +
+                      model
+                          .getArtists()[index]
+                          .categories[1]
+                          .toString()
+                          .replaceAll('Category.', ', ') +
+                      ' and ' +
+                      model
+                          .getArtists()[index]
+                          .categories[2]
+                          .toString()
+                          .replaceAll('Category.', '')),
+                  onTap: () {
+                    print('card Tapped');
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ArtistDetail(
+                                  artist: model.getArtistById(index),
+                                )));
+                  },
                 ),
-                title: Text(id),
-                subtitle: Text(
-                    'Cartoons and Wild life'),
-                onTap: () {
-                  print('card Tapped');
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => ArtistDetail()));
-                },
               ),
             );
-          }).toList(),
+          },
         );
+
     return ScopedModelDescendant(
       builder: (BuildContext context, Widget child, MainModel model) {
         _content = _buildListOfArtists(model);
         return Scaffold(
-    
           appBar: AppBar(
-
             title: Text('Artists',
                 style: TextStyle(
                     color: Colors.white,
@@ -88,7 +94,7 @@ class _ArtistState extends State<ArtistPage> {
             onRefresh: _handleRefresh,
             showChildOpacityTransition: false,
             color: UIData.primaryColor,
-            
+
             child: _content, // scroll view
           ),
         );
