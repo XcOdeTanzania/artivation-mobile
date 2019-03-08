@@ -1,9 +1,11 @@
+import 'package:artivation/api/api.dart';
 import 'package:artivation/models/artist.dart';
 import 'package:artivation/models/piece.dart';
 import 'package:artivation/models/repos/artist_repository.dart';
-import 'package:artivation/models/repos/piece_repository.dart';
 import 'package:artivation/utils/enum.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 double _salesTaxRate = 0.06;
 double _shippingCostPerItem = 7.0;
@@ -85,6 +87,16 @@ mixin UtilityModel on ConnectedPiecesModel {
     _isLoggedIn = !_isLoggedIn;
     notifyListeners();
   }
+
+  Future<void> recover() async {
+    // List<int> byteArray = [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100];
+    // String result = utf8.decode(byteArray);
+    // print('++++++++++++++++++++++++');
+    // print(utf8.decode(byteArray));
+    // List<int> orginal = utf8.encode("Hello World");
+    // print('--------------------------');
+    // print(orginal);
+  }
 }
 
 mixin PieceModel on ConnectedPiecesModel {
@@ -114,25 +126,63 @@ mixin PieceModel on ConnectedPiecesModel {
     notifyListeners();
   }
 
-  void togglePieceFavoriteStatus(int pieceId) {
+  Future<void> updateFavorite(int userId, int pieceId) async {
     final Piece piece =
         _availablePieces.firstWhere((Piece piece) => piece.id == pieceId);
 
+    _togglePieceFavoriteStatus(pieceId, false);
+    List<int> _currentFavoriteList = [];
+    _currentFavoriteList = piece.favoriteList;
+    print(_currentFavoriteList);
+
+    if (piece.isFavorite) {
+      _currentFavoriteList.removeWhere((item) => item == userId);
+      print("----------------------------------");
+      print(_currentFavoriteList);
+    } else {
+      print('bossssss');
+      _currentFavoriteList.add(userId);
+      print(_currentFavoriteList);
+    }
+    final Map<String, dynamic> updatePiece = {
+      'cart_status': piece.cartStatus,
+      'favorite_list': utf8.decode(piece.favoriteList),
+    };
+
+    try {
+      await http.put(api + "piece/" + pieceId.toString(),
+          body: json.encode(updatePiece));
+      // print(json.decode(response.body));
+      print(api + "piece/" + pieceId.toString());
+    } catch (error) {
+      print('An error occured');
+      print(error);
+      _togglePieceFavoriteStatus(pieceId, true);
+    }
+  }
+
+  void _togglePieceFavoriteStatus(int pieceId, bool err) {
+    final Piece piece =
+        _availablePieces.firstWhere((Piece piece) => piece.id == pieceId);
+
+    final int photoIndex = _availablePieces.indexWhere((Piece p) {
+      return p.id == pieceId;
+    });
+
     final bool isCurrentlyFavorite = piece.isFavorite;
-    print(piece.isFavorite);
-    print('Then');
+
     final bool newFavoriteStatus = !isCurrentlyFavorite;
     print(newFavoriteStatus);
 
     int newLikeCount = piece.likeCounts;
+    print(newLikeCount);
     if (newFavoriteStatus) {
       newLikeCount++;
+      print(newLikeCount);
     } else {
       newLikeCount--;
+      print(newLikeCount);
     }
-    print(newLikeCount);
-
-    print(newFavoriteStatus);
 
     final Piece updatedPiece = Piece(
         cartStatus: piece.cartStatus,
@@ -141,14 +191,15 @@ mixin PieceModel on ConnectedPiecesModel {
         image: piece.image,
         isFavorite: newFavoriteStatus,
         price: piece.price,
-        artistName: piece.artistName,
+        artistId: piece.artistId,
         likeCounts: newLikeCount,
         desc: piece.desc,
         rate: piece.rate,
         size: piece.size,
-        title: piece.title);
+        title: piece.title,
+        favoriteList: piece.favoriteList);
 
-    _availablePieces[pieceId] = updatedPiece;
+    _availablePieces[photoIndex] = updatedPiece;
 
     notifyListeners();
   }
@@ -159,8 +210,23 @@ mixin PieceModel on ConnectedPiecesModel {
   }
 
   // Loads the list of available products from the repo.
-  void loadPieces() {
-    _availablePieces = PieceRepository.loadPieces(Category.all);
+  Future<void> fetchPieces() async {
+    final List<Piece> _fetchedPieces = [];
+    try {
+      final http.Response response = await http.get(api + "pieces");
+      final Map<String, dynamic> data = json.decode(response.body);
+
+      data['pieces'].forEach((pieceData) {
+        print(pieceData['id']);
+        final piece = Piece.fromMap(pieceData);
+        _fetchedPieces.add(piece);
+      });
+      print(_fetchedPieces);
+    } catch (error) {
+      print(error);
+    }
+    _availablePieces = _fetchedPieces;
+    //_availablePieces = PieceRepository.loadPieces(Category.all);
     notifyListeners();
   }
 
@@ -217,12 +283,13 @@ mixin CartModel on ConnectedPiecesModel {
         image: piece.image,
         isFavorite: piece.isFavorite,
         price: piece.price,
-        artistName: piece.artistName,
+        artistId: piece.artistId,
         likeCounts: piece.likeCounts,
         desc: piece.desc,
         rate: piece.rate,
         size: piece.size,
-        title: piece.title);
+        title: piece.title,
+        favoriteList: piece.favoriteList);
     print(updatedPiece);
     _availablePieces[pieceId] = updatedPiece;
     notifyListeners();
@@ -248,12 +315,13 @@ mixin CartModel on ConnectedPiecesModel {
         image: piece.image,
         isFavorite: piece.isFavorite,
         price: piece.price,
-        artistName: piece.artistName,
+        artistId: piece.artistId,
         likeCounts: piece.likeCounts,
         desc: piece.desc,
         rate: piece.rate,
         size: piece.size,
-        title: piece.title);
+        title: piece.title,
+        favoriteList: piece.favoriteList);
 
     _availablePieces[pieceId] = updatedPiece;
 

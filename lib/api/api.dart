@@ -1,1 +1,1 @@
-const api = "https://qlicue.co.tz/bizcard-server/api/";
+const api = "http://192.168.1.107:8000/api/";

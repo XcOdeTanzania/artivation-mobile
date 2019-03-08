@@ -3,6 +3,7 @@ import 'package:artivation/scoped-models/main.dart';
 import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:flutter_image/network.dart';
 
 class PieceItem extends StatelessWidget {
   PieceItem({Key key, @required this.piece, this.shape}) : super(key: key);
@@ -38,9 +39,11 @@ class PieceItem extends StatelessWidget {
                     children: <Widget>[
                       Positioned.fill(
                         child: GestureDetector(
-                          child: Image.asset(
-                            piece.image,
+                          child: FadeInImage(
                             fit: BoxFit.cover,
+                            image: NetworkImageWithRetry(piece.image),
+                            placeholder:
+                                AssetImage('assets/img/placeholder.png'),
                           ),
                           onTap: () {
                             print('Art pice has been tapped');
@@ -84,7 +87,7 @@ class PieceItem extends StatelessWidget {
                             ),
                           ),
                           Text(piece.size),
-                          Text(piece.artistName),
+                          // Text(piece.artistName),
                         ],
                       ),
                     ),
@@ -109,8 +112,8 @@ class PieceItem extends StatelessWidget {
                               ],
                             ),
                             onPressed: () {
-                              print(piece.id);
-                              model.togglePieceFavoriteStatus(piece.id);
+                              model.updateFavorite(32, piece.id);
+
                               //print(model.getPieceById(piece.id).isFavorite) ;
                             },
                           ),

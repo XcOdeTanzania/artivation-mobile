@@ -71,7 +71,7 @@ class GridPieceItem extends StatelessWidget {
           header: GestureDetector(
             onTap: () {
               onBannerTap(piece);
-              model.togglePieceFavoriteStatus(piece.id);
+              model.updateFavorite(32, piece.id);
             },
             child: GridTileBar(
               title: GridTitleText(piece.title),
@@ -91,7 +91,7 @@ class GridPieceItem extends StatelessWidget {
           footer: GestureDetector(
             onTap: () {
               onBannerTap(piece);
-              model.togglePieceFavoriteStatus(piece.id);
+             model.updateFavorite(32, piece.id);
             },
             child: GridTileBar(
               backgroundColor: Colors.black45,

@@ -26,7 +26,7 @@ class PiecePageState extends State<PiecePage> {
   PiecePageState(this._model, this._menuController);
   @override
   void initState() {
-    _model.loadPieces();
+    _model.fetchPieces();
     _model.loadArtists();
     super.initState();
   }
@@ -36,7 +36,7 @@ class PiecePageState extends State<PiecePage> {
   @override
   Widget build(BuildContext context) {
     Future<Null> _handleRefresh() async {
-      _model.loadPieces();
+      _model.fetchPieces();
       print(_model.getPieces().length);
     }
 
