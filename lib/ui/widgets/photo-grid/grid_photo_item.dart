@@ -1,4 +1,3 @@
-
 import 'package:artivation/models/piece.dart';
 import 'package:artivation/scoped-models/main.dart';
 import 'package:artivation/ui/widgets/photo-grid/grid_tile_text.dart';
@@ -6,6 +5,7 @@ import 'package:artivation/ui/widgets/photo-grid/photo_grid_viewer.dart';
 import 'package:artivation/utils/enum.dart';
 import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image/network.dart';
 
 typedef BannerTapCallback = void Function(Piece piece);
 
@@ -16,8 +16,7 @@ class GridPieceItem extends StatelessWidget {
       @required this.model,
       @required this.tileStyle,
       @required this.onBannerTap})
-      : 
-        assert(tileStyle != null),
+      : assert(tileStyle != null),
         assert(onBannerTap != null),
         super(key: key);
 
@@ -56,11 +55,10 @@ class GridPieceItem extends StatelessWidget {
               ? showPhoto(context)
               : goToProductDetail(context);
         },
-        child: Image.asset(
-          piece.image,
-          fit:BoxFit.cover
-        )
-            );
+        child: Image(
+          fit: BoxFit.cover,
+          image: NetworkImageWithRetry(piece.image),
+        ));
 
     switch (tileStyle) {
       case GridTileStyle.imageOnly:
@@ -77,8 +75,9 @@ class GridPieceItem extends StatelessWidget {
               title: GridTitleText(piece.title),
               backgroundColor: Colors.black45,
               leading: Icon(
-                model.getPieceById(piece.id).isFavorite ?
-                Icons.favorite: Icons.favorite_border,
+                model.getPieceById(piece.id).isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border,
                 color: UIData.primaryColor,
               ),
             ),
@@ -91,15 +90,16 @@ class GridPieceItem extends StatelessWidget {
           footer: GestureDetector(
             onTap: () {
               onBannerTap(piece);
-             model.updateFavorite(32, piece.id);
+              model.updateFavorite(32, piece.id);
             },
             child: GridTileBar(
               backgroundColor: Colors.black45,
               title: GridTitleText(piece.title),
-              subtitle: GridTitleText('\$ '+piece.price.toString()),
+              subtitle: GridTitleText('\$ ' + piece.price.toString()),
               trailing: Icon(
-                model.getPieceById(piece.id).isFavorite ?
-                Icons.favorite: Icons.favorite_border,
+                model.getPieceById(piece.id).isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border,
                 color: UIData.primaryColor,
               ),
             ),

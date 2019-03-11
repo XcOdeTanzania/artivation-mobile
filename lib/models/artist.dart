@@ -20,4 +20,20 @@ class Artist {
       @required this.numberOfLikes,
       @required this.categories,
       @required this.ratings});
+
+  Artist.fromMap(Map<String, dynamic> map)
+      : assert(map['id'] != null),
+        assert(map['name'] != null),
+        id = map['id'],
+        name = map['name'],
+        avatar = map['photo_url'],
+        numberOfPieces = map['number_of_pieces'],
+        numberOfPiecesBought = map['number_of_pieces_bought'],
+        numberOfLikes = map['number_of_likes'],
+        ratings = map['ratings'].toDouble(),
+        categories = <Category>[
+          Category.beaches,
+          Category.grafitti,
+          Category.house
+        ];
 }

@@ -4,7 +4,7 @@ import 'package:artivation/scoped-models/connected_pieces.dart';
 class MainModel extends Model
     with
         ConnectedPiecesModel,
-        UserModel,
+        LoginModel,
         PieceModel,
         UtilityModel,
         ArtistModel,

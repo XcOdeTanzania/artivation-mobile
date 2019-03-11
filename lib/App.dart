@@ -7,15 +7,25 @@ import 'package:scoped_model/scoped_model.dart';
 
 class App extends StatefulWidget {
   @override
-  AppState createState() {
-    return new AppState();
+  State<StatefulWidget> createState() {
+    return AppState();
   }
 }
 
 class AppState extends State<App> {
   final MainModel _model = MainModel();
+  bool _isAuthenticated = false;
 
-  var selectedMenuItemId = 'restaurant';
+  @override
+  void initState() {
+    _model.autoAuthenticate();
+    _model.userSubject.listen((bool isAuthenticated) {
+      setState(() {
+        _isAuthenticated = isAuthenticated;
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,14 +37,16 @@ class AppState extends State<App> {
           primarySwatch: Colors.blue,
         ),
         routes: {
-          '/': (BuildContext context) => _model.isLoggedIn
+          '/': (BuildContext context) => _isAuthenticated
               ? ZoomScaffold(
                   menuScreen: MenuScreen(
                     model: _model,
                   ),
                   model: _model,
                 )
-              : LoginPage()
+              : LoginPage(
+                  model: _model,
+                )
         },
       ),
       model: _model,

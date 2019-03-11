@@ -2,16 +2,14 @@ import 'package:artivation/scoped-models/main.dart';
 import 'package:artivation/ui/pages/artist_detail_page.dart';
 import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image/network.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-
-
 
 class ArtistPage extends StatefulWidget {
   final MainModel model;
 
   ArtistPage(this.model);
-
 
   @override
   _ArtistState createState() => _ArtistState();
@@ -20,13 +18,17 @@ class ArtistPage extends StatefulWidget {
 class _ArtistState extends State<ArtistPage> {
   @override
   void initState() {
-    //widget.model.fetchArtists();
+    widget.model.fetchArtists();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    Future<Null> _handleRefresh() async {}
+    Future<Null> _handleRefresh() async {
+      widget.model.fetchArtists();
+      print(widget.model.getArtists().length);
+    }
+
     Widget _content = ListView(
       children: <Widget>[Center(child: Text('No Artist Found!'))],
     );
@@ -44,7 +46,7 @@ class _ArtistState extends State<ArtistPage> {
                   leading: CircleAvatar(
                     radius: 36.0,
                     backgroundImage:
-                        AssetImage(model.getArtists()[index].avatar),
+                        NetworkImageWithRetry(model.getArtists()[index].avatar),
                   ),
                   title: Text(model.getArtists()[index].name),
                   subtitle: Text(model
@@ -69,7 +71,7 @@ class _ArtistState extends State<ArtistPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => ArtistDetail(
-                                  artist: model.getArtistById(index),
+                                  artist: model.getArtists()[index],
                                 )));
                   },
                 ),

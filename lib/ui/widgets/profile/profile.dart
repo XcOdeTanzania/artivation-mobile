@@ -3,15 +3,9 @@ import 'package:artivation/ui/pages/gallery_page.dart';
 import 'package:artivation/ui/widgets/profile/chip_tile.dart';
 import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image/network.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 
-// const List<String> _defaultMaterials = <String>[
-//   'People',
-//   'Animation',
-//   'Nature',
-//   'grafiti',
-//   'Love',
-// ];
 
 class Profile extends StatefulWidget {
   final Artist artist;
@@ -33,7 +27,7 @@ class ProfileState extends State<Profile> {
   final Set<String> _materials = Set<String>();
 
   String _selectedMaterial = '';
-  double rating = 4.5;
+ // double rating = 4.5;
   int starCount = 5;
 
   void _reset() {
@@ -77,7 +71,7 @@ class ProfileState extends State<Profile> {
           ),
           onPressed: () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => GalleryGridList()));
+                MaterialPageRoute(builder: (context) => GalleryGridList(sender: "artist", artist: widget.artist,)));
           }),
     );
   }
@@ -101,13 +95,13 @@ class ProfileState extends State<Profile> {
           starCount: starCount,
           onRatingChanged: (rating) => setState(
                 () {
-                  this.rating = rating;
+                  //this.rating = widget.artist.ratings;
                 },
               ),
         ),
       ),
       Text(
-        "$rating",
+        widget.artist.ratings.toString(),
         style: new TextStyle(fontSize: 30.0),
       )
     ]);
@@ -124,7 +118,7 @@ class ProfileState extends State<Profile> {
             Center(
               child: CircleAvatar(
                 radius: MediaQuery.of(context).size.width / 8,
-                backgroundImage: AssetImage(widget.artist.avatar),
+                backgroundImage: NetworkImageWithRetry(widget.artist.avatar),
               ),
             ),
             Text(

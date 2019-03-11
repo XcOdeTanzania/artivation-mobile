@@ -8,7 +8,9 @@ import 'package:artivation/utils/bubble_indication_painter.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key key}) : super(key: key);
+  LoginPage({Key key, this.model}) : super(key: key);
+
+  final MainModel model;
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -289,8 +291,9 @@ class _LoginPageState extends State<LoginPage>
                                 suffixIcon: GestureDetector(
                                   onTap: _toggleLogin,
                                   child: Icon(
-                                    _obscureTextLogin?
-                                    FontAwesomeIcons.eye :FontAwesomeIcons.eyeSlash,
+                                    _obscureTextLogin
+                                        ? FontAwesomeIcons.eye
+                                        : FontAwesomeIcons.eyeSlash,
                                     size: 15.0,
                                     color: Colors.black,
                                   ),
@@ -335,17 +338,35 @@ class _LoginPageState extends State<LoginPage>
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 10.0, horizontal: 42.0),
-                          child: Text(
-                            "LOGIN",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 25.0,
-                                fontFamily: "WorkSansBold"),
-                          ),
+                          child: widget.model.isLoading
+                              ? CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                )
+                              : Text(
+                                  "LOGIN",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 25.0,
+                                      fontFamily: "WorkSansBold"),
+                                ),
                         ),
                         onPressed: () {
-                          model.userLogin();
-                          Navigator.pushReplacementNamed(context, '/');
+                          if (loginEmailController.text.isNotEmpty &&
+                              loginPasswordController.text.isNotEmpty) {
+                            model
+                                .signInUser(loginEmailController.text,
+                                    loginPasswordController.text)
+                                .then((val) {
+                              if (!val) {
+                                loginEmailController.clear();
+                                loginPasswordController.clear();
+                                Navigator.pushReplacementNamed(context, '/');
+                              } else {
+                                print('Error while singing in');
+                              }
+                            });
+                          }
                         }),
                   ),
                 ],
@@ -571,8 +592,9 @@ class _LoginPageState extends State<LoginPage>
                                 suffixIcon: GestureDetector(
                                   onTap: _toggleSignup,
                                   child: Icon(
-                                    _obscureTextSignup ?
-                                    FontAwesomeIcons.eye:FontAwesomeIcons.eyeSlash,
+                                    _obscureTextSignup
+                                        ? FontAwesomeIcons.eye
+                                        : FontAwesomeIcons.eyeSlash,
                                     size: 15.0,
                                     color: Colors.black,
                                   ),
@@ -611,8 +633,9 @@ class _LoginPageState extends State<LoginPage>
                                 suffixIcon: GestureDetector(
                                   onTap: _toggleSignupConfirm,
                                   child: Icon(
-                                    _obscureTextSignupConfirm ?
-                                    FontAwesomeIcons.eye:FontAwesomeIcons.eyeSlash,
+                                    _obscureTextSignupConfirm
+                                        ? FontAwesomeIcons.eye
+                                        : FontAwesomeIcons.eyeSlash,
                                     size: 15.0,
                                     color: Colors.black,
                                   ),
@@ -666,8 +689,26 @@ class _LoginPageState extends State<LoginPage>
                           ),
                         ),
                         onPressed: () {
-                          model.userLogin();
-                          Navigator.pushReplacementNamed(context, '/');
+                          if (signupPasswordController.text ==
+                              signupConfirmPasswordController.text) {
+                            if (signupEmailController.text.isNotEmpty &&
+                                signupNameController.text.isNotEmpty) {
+                              model
+                                  .signUpUser(
+                                      signupNameController.text,
+                                      signupEmailController.text,
+                                      signupPasswordController.text)
+                                  .then((val) {
+                                if (!val) {
+                                  loginEmailController.clear();
+                                  loginPasswordController.clear();
+                                  Navigator.pushReplacementNamed(context, '/');
+                                } else {
+                                  print('Error while singing in');
+                                }
+                              });
+                            }
+                          }
                         }),
                   ),
                 ],

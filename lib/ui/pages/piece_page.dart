@@ -26,8 +26,7 @@ class PiecePageState extends State<PiecePage> {
   PiecePageState(this._model, this._menuController);
   @override
   void initState() {
-    _model.fetchPieces();
-    _model.loadArtists();
+    _model.fetchPieces(widget.model.authenticatedUser.id);
     super.initState();
   }
 
@@ -36,8 +35,7 @@ class PiecePageState extends State<PiecePage> {
   @override
   Widget build(BuildContext context) {
     Future<Null> _handleRefresh() async {
-      _model.fetchPieces();
-      print(_model.getPieces().length);
+      _model.fetchPieces(widget.model.authenticatedUser.id);
     }
 
     return ScopedModelDescendant(

@@ -1,8 +1,13 @@
+import 'package:artivation/scoped-models/main.dart';
 import 'package:flutter/material.dart';
 
 import 'package:artivation/utils/ui_data.dart';
+import 'package:flutter_image/network.dart';
 
 class ProfileDetail extends StatelessWidget {
+  final MainModel model;
+
+  const ProfileDetail({Key key, this.model}) : super(key: key);
   Widget topHalf(BuildContext context) {
     return Flexible(
       flex: 2,
@@ -14,11 +19,12 @@ class ProfileDetail extends StatelessWidget {
             Center(
               child: CircleAvatar(
                 radius: MediaQuery.of(context).size.width / 8,
-                backgroundImage: AssetImage('assets/saida.jpg'),
+                backgroundImage:
+                    NetworkImageWithRetry(model.authenticatedUser.photoUrl),
               ),
             ),
             Text(
-              'Sam Baseif',
+              model.authenticatedUser.username,
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -40,7 +46,7 @@ class ProfileDetail extends StatelessWidget {
             Icons.person,
             color: UIData.primaryColor,
           ),
-          title: Text('Sam Baseif'),
+          title: Text(model.authenticatedUser.username),
           trailing: Icon(
             Icons.edit,
             color: UIData.primaryColor,
@@ -55,7 +61,7 @@ class ProfileDetail extends StatelessWidget {
             Icons.email,
             color: UIData.primaryColor,
           ),
-          title: Text('sambaseif12@gmail.com'),
+          title: Text(model.authenticatedUser.email),
           trailing: Icon(
             Icons.edit,
             color: UIData.primaryColor,
@@ -70,7 +76,7 @@ class ProfileDetail extends StatelessWidget {
             Icons.phone,
             color: UIData.primaryColor,
           ),
-          title: Text('+255-715-785-672'),
+          title: Text(model.authenticatedUser.phone),
           trailing: Icon(
             Icons.edit,
             color: UIData.primaryColor,
@@ -85,7 +91,7 @@ class ProfileDetail extends StatelessWidget {
             Icons.people_outline,
             color: UIData.primaryColor,
           ),
-          title: Text('Female'),
+          title: Text(model.authenticatedUser.sex),
           trailing: Icon(
             Icons.edit,
             color: UIData.primaryColor,

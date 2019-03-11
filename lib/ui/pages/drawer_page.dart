@@ -9,8 +9,8 @@ import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:flutter_image/network.dart';
 
-const String _kAsset0 = 'assets/saida.jpg';
 const String _kAsset1 = 'assets/kalimwenjuma.jpg';
 const String _kAsset2 = 'assets/robbyn.jpg';
 
@@ -71,30 +71,35 @@ class _DrawerPageState extends State<DrawerPage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   color: UIData.primaryColor,
                 ),
-                accountName: const Text('Sam Baseif'),
-                accountEmail: const Text('sambaseif12@gmail.com'),
-                currentAccountPicture: const CircleAvatar(
-                  backgroundImage: AssetImage(_kAsset0),
+                accountName: Text(model.authenticatedUser.username),
+                accountEmail: Text(model.authenticatedUser.email),
+                currentAccountPicture: CircleAvatar(
+                  backgroundImage:
+                      NetworkImageWithRetry(model.authenticatedUser.photoUrl),
                 ),
                 otherAccountsPictures: <Widget>[
-                  GestureDetector(
-                    onTap: () {},
-                    child: Semantics(
-                      label: 'Switch to Account B',
-                      child: const CircleAvatar(
-                        backgroundImage: AssetImage(_kAsset1),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Semantics(
-                      label: 'Switch to Account C',
-                      child: const CircleAvatar(
-                        backgroundImage: AssetImage(_kAsset2),
-                      ),
-                    ),
-                  ),
+                  model.authenticatedUser1 != null
+                      ? GestureDetector(
+                          onTap: () {},
+                          child: Semantics(
+                            label: 'Switch to Account B',
+                            child: const CircleAvatar(
+                              backgroundImage: AssetImage(_kAsset1),
+                            ),
+                          ),
+                        )
+                      : null,
+                  model.authenticatedUser2 != null
+                      ? GestureDetector(
+                          onTap: () {},
+                          child: Semantics(
+                            label: 'Switch to Account C',
+                            child: const CircleAvatar(
+                              backgroundImage: AssetImage(_kAsset2),
+                            ),
+                          ),
+                        )
+                      : null,
                 ],
                 margin: EdgeInsets.zero,
                 onDetailsPressed: () {
@@ -143,8 +148,9 @@ class _DrawerPageState extends State<DrawerPage> with TickerProviderStateMixin {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                ProfilePage()));
+                                            builder: (context) => ProfilePage(
+                                                  model: model,
+                                                )));
                                   },
                                 ),
                                 ListTile(
@@ -157,7 +163,9 @@ class _DrawerPageState extends State<DrawerPage> with TickerProviderStateMixin {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                PurchasedGridList()));
+                                                PurchasedGridList(
+                                                  model: model,
+                                                )));
                                   },
                                 ),
                                 ListTile(
@@ -235,7 +243,7 @@ class _DrawerPageState extends State<DrawerPage> with TickerProviderStateMixin {
                                       color: UIData.primaryColor),
                                   title: Text('Logout'),
                                   onTap: () {
-                                    model.userLogin();
+                                    model.logout();
                                     Navigator.pushReplacementNamed(
                                         context, '/');
                                   },

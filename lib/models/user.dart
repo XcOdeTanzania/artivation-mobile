@@ -4,15 +4,19 @@ class User {
   final int id;
   final String email;
   final String photoUrl;
-  final String userName;
+  final String username;
+   final String sex;
+    final String phone;
   final String token;
 
-  User(
+  User( 
       {@required this.id,
-      @required this.userName,
+      @required this.username,
       @required this.photoUrl,
       @required this.email,
-      @required this.token});
+      @required this.token,
+      @required  this.sex, 
+      @required  this.phone,});
 
   User.fromMap(Map<String, dynamic> map)
       : assert(map['id'] != null),
@@ -21,7 +25,9 @@ class User {
         assert(map['token'] != null),
         id = map['category'],
         email = map['email'],
-        userName = map['userName'],
+        username = map['userName'],
         token = map['name'],
-        photoUrl = map['photoUrl'];
+        photoUrl = map['photoUrl'],
+        sex = map['sex'],
+        phone = map['phone'];
 }

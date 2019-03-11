@@ -112,7 +112,7 @@ class PieceItem extends StatelessWidget {
                               ],
                             ),
                             onPressed: () {
-                              model.updateFavorite(32, piece.id);
+                              model.updateFavorite(model.authenticatedUser.id, piece.id);
 
                               //print(model.getPieceById(piece.id).isFavorite) ;
                             },

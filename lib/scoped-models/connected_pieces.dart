@@ -1,11 +1,13 @@
 import 'package:artivation/api/api.dart';
 import 'package:artivation/models/artist.dart';
 import 'package:artivation/models/piece.dart';
-import 'package:artivation/models/repos/artist_repository.dart';
+import 'package:artivation/models/user.dart';
 import 'package:artivation/utils/enum.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:rxdart/subjects.dart';
 
 double _salesTaxRate = 0.06;
 double _shippingCostPerItem = 7.0;
@@ -17,10 +19,15 @@ mixin ConnectedPiecesModel on Model {
   bool _isLoading = false;
   bool _isCategory = false;
 
-  bool _isLoggedIn = false;
+  User _authenticatedUser;
+  User _authenticatedUser1;
+  User _authenticatedUser2;
 
   // All the available pieces.
   List<Piece> _availablePieces;
+
+  // All the available pieces.
+  List<Piece> _purchasedPieces;
 
   // All the available artists
   List<Artist> _availableArtists;
@@ -66,7 +73,163 @@ mixin PiecesModel on ConnectedPiecesModel {
   }
 }
 
-mixin UserModel on ConnectedPiecesModel {}
+mixin LoginModel on ConnectedPiecesModel {
+  PublishSubject<bool> _userSubject = PublishSubject();
+  User get authenticatedUser {
+    return _authenticatedUser;
+  }
+
+  User get authenticatedUser1 {
+    return _authenticatedUser1;
+  }
+
+  User get authenticatedUser2 {
+    return _authenticatedUser2;
+  }
+
+  PublishSubject<bool> get userSubject {
+    return _userSubject;
+  }
+
+  void autoAuthenticate() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String token = prefs.getString('token');
+    if (token != null) {
+      final String userEmail = prefs.getString('email');
+      final String userId = prefs.getString('id');
+      final String userPhone = prefs.getString('phone');
+      final String userSex = prefs.getString('sex');
+      final String username = prefs.getString('username');
+      final String userPhotoUrl = prefs.getString('photoUrl');
+
+      _authenticatedUser = User(
+          id: int.parse(userId),
+          email: userEmail,
+          token: token,
+          phone: userPhone,
+          photoUrl: userPhotoUrl,
+          sex: userSex,
+          username: username);
+
+      _userSubject.add(true);
+    }
+
+    notifyListeners();
+  }
+
+  Future<bool> signInUser(String email, String password) async {
+    _isLoading = true;
+    final Map<String, dynamic> authData = {
+      'email': email,
+      'password': password,
+    };
+    final http.Response response = await http.post(
+      api + "login",
+      body: json.encode(authData),
+      headers: {'Content-Type': 'application/json'},
+    );
+    final Map<String, dynamic> responseData = json.decode(response.body);
+    bool hasError = true;
+    //String message = 'Something went wrong.';
+    //print(responseData);
+    if (responseData.containsKey('token')) {
+      hasError = false;
+      // message = 'Authentication succeeded!';
+      _authenticatedUser = User(
+          id: responseData['id'],
+          email: email,
+          token: responseData['token'],
+          photoUrl: responseData['photo_url'],
+          username: responseData['username'],
+          phone: responseData['phone'],
+          sex: responseData['sex']);
+      _userSubject.add(true);
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      prefs.setString('id', responseData['id'].toString());
+      prefs.setString('email', email);
+      prefs.setString('token', responseData['token']);
+      prefs.setString('photoUrl', responseData['photo_url']);
+      prefs.setString('username', responseData['username']);
+      prefs.setString('sex', responseData['sex']);
+      prefs.setString('phone', responseData['phone']);
+    } else {
+      //message = "Error";
+      hasError = true;
+      print('oooooooooooo');
+    }
+    _isLoading = false;
+    notifyListeners();
+    return hasError;
+  }
+
+  Future<bool> signUpUser(
+      String username, String email, String password) async {
+    print(username);
+    print(email);
+    print(password);
+
+    _isLoading = true;
+    final Map<String, dynamic> authData = {
+      'email': email,
+      'password': password,
+      'username': username,
+      'photo_url': 'male.png',
+    };
+    final http.Response response = await http.post(
+      api + "signUp",
+      body: json.encode(authData),
+      headers: {'Content-Type': 'application/json'},
+    );
+    final Map<String, dynamic> responseData = json.decode(response.body);
+    bool hasError = true;
+    //String message = 'Something went wrong.';
+    //print(responseData);
+    if (responseData.containsKey('token')) {
+      hasError = false;
+      // message = 'Authentication succeeded!';
+      _authenticatedUser = User(
+          id: responseData['id'],
+          email: email,
+          token: responseData['token'],
+          photoUrl: responseData['photo_url'],
+          username: responseData['username'],
+          phone: responseData['phone'],
+          sex: responseData['sex']);
+      _userSubject.add(true);
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      prefs.setString('id', responseData['id'].toString());
+      prefs.setString('email', email);
+      prefs.setString('token', responseData['token']);
+      prefs.setString('photoUrl', responseData['photo_url']);
+      prefs.setString('username', responseData['username']);
+      prefs.setString('sex', responseData['sex']);
+      prefs.setString('phone', responseData['phone']);
+    } else {
+      hasError = true;
+    }
+    _isLoading = false;
+    notifyListeners();
+    return hasError;
+  }
+
+  void logout() async {
+    _authenticatedUser = null;
+    _userSubject.add(false);
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('id');
+    prefs.remove('email');
+    prefs.remove('token');
+    prefs.remove('photoUrl');
+    prefs.remove('username');
+    prefs.remove('sex');
+    prefs.remove('phone');
+  }
+}
 
 mixin UtilityModel on ConnectedPiecesModel {
   bool get isCategogry => _isCategory;
@@ -75,27 +238,6 @@ mixin UtilityModel on ConnectedPiecesModel {
   //getters
   bool get isLoading {
     return _isLoading;
-  }
-
-  //temory login
-  bool get isLoggedIn {
-    return _isLoggedIn;
-  }
-
-  //Temporary login
-  void userLogin() {
-    _isLoggedIn = !_isLoggedIn;
-    notifyListeners();
-  }
-
-  Future<void> recover() async {
-    // List<int> byteArray = [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100];
-    // String result = utf8.decode(byteArray);
-    // print('++++++++++++++++++++++++');
-    // print(utf8.decode(byteArray));
-    // List<int> orginal = utf8.encode("Hello World");
-    // print('--------------------------');
-    // print(orginal);
   }
 }
 
@@ -117,6 +259,20 @@ mixin PieceModel on ConnectedPiecesModel {
     }
   }
 
+  List<Piece> gePurchasedPieces() {
+    if (_purchasedPieces == null) {
+      return <Piece>[];
+    }
+
+    return List<Piece>.from(_purchasedPieces);
+  }
+
+  List<Piece> getArtistPieces(int artstId) {
+    return _availablePieces
+        .where((Piece piece) => piece.artistId == artstId)
+        .toList();
+  }
+
   bool get isFavorite {
     return _isFavorite;
   }
@@ -127,36 +283,22 @@ mixin PieceModel on ConnectedPiecesModel {
   }
 
   Future<void> updateFavorite(int userId, int pieceId) async {
-    final Piece piece =
-        _availablePieces.firstWhere((Piece piece) => piece.id == pieceId);
-
+    
     _togglePieceFavoriteStatus(pieceId, false);
-    List<int> _currentFavoriteList = [];
-    _currentFavoriteList = piece.favoriteList;
-    print(_currentFavoriteList);
 
-    if (piece.isFavorite) {
-      _currentFavoriteList.removeWhere((item) => item == userId);
-      print("----------------------------------");
-      print(_currentFavoriteList);
-    } else {
-      print('bossssss');
-      _currentFavoriteList.add(userId);
-      print(_currentFavoriteList);
-    }
-    final Map<String, dynamic> updatePiece = {
-      'cart_status': piece.cartStatus,
-      'favorite_list': utf8.decode(piece.favoriteList),
+    final Map<String, dynamic> updatePieceLikesStatus = {
+      "user_id": userId,
+      "piece_id": pieceId
     };
 
     try {
-      await http.put(api + "piece/" + pieceId.toString(),
-          body: json.encode(updatePiece));
-      // print(json.decode(response.body));
-      print(api + "piece/" + pieceId.toString());
+      http.Response response = await http.post(
+        api + "like",
+        body: json.encode(updatePieceLikesStatus),
+        headers: {'Content-Type': 'application/json'},
+      );
+      print(response.body);
     } catch (error) {
-      print('An error occured');
-      print(error);
       _togglePieceFavoriteStatus(pieceId, true);
     }
   }
@@ -196,8 +338,7 @@ mixin PieceModel on ConnectedPiecesModel {
         desc: piece.desc,
         rate: piece.rate,
         size: piece.size,
-        title: piece.title,
-        favoriteList: piece.favoriteList);
+        title: piece.title);
 
     _availablePieces[photoIndex] = updatedPiece;
 
@@ -210,12 +351,12 @@ mixin PieceModel on ConnectedPiecesModel {
   }
 
   // Loads the list of available products from the repo.
-  Future<void> fetchPieces() async {
+  Future<void> fetchPieces(int userId) async {
     final List<Piece> _fetchedPieces = [];
     try {
-      final http.Response response = await http.get(api + "pieces");
+      final http.Response response =
+          await http.get(api + "pieces/" + userId.toString());
       final Map<String, dynamic> data = json.decode(response.body);
-
       data['pieces'].forEach((pieceData) {
         print(pieceData['id']);
         final piece = Piece.fromMap(pieceData);
@@ -232,6 +373,26 @@ mixin PieceModel on ConnectedPiecesModel {
 
   Future<void> setCategory(Category newCategory) async {
     _selectedCategory = newCategory;
+    notifyListeners();
+  }
+
+  //fetch purchased pieces
+  Future<void> fetchPurchasedPieces(int userId) async {
+    final List<Piece> _fetchedPurchasedPieces = [];
+    try {
+      final http.Response response =
+          await http.get(api + "pieces/purchased/" + userId.toString());
+      final Map<String, dynamic> data = json.decode(response.body);
+
+      data['pieces'].forEach((pieceData) {
+        final piece = Piece.fromMap(pieceData);
+        _fetchedPurchasedPieces.add(piece);
+      });
+      print(_fetchedPurchasedPieces);
+    } catch (error) {
+      print(error);
+    }
+    _purchasedPieces = _fetchedPurchasedPieces;
     notifyListeners();
   }
 }
@@ -288,8 +449,7 @@ mixin CartModel on ConnectedPiecesModel {
         desc: piece.desc,
         rate: piece.rate,
         size: piece.size,
-        title: piece.title,
-        favoriteList: piece.favoriteList);
+        title: piece.title);
     print(updatedPiece);
     _availablePieces[pieceId] = updatedPiece;
     notifyListeners();
@@ -320,8 +480,7 @@ mixin CartModel on ConnectedPiecesModel {
         desc: piece.desc,
         rate: piece.rate,
         size: piece.size,
-        title: piece.title,
-        favoriteList: piece.favoriteList);
+        title: piece.title);
 
     _availablePieces[pieceId] = updatedPiece;
 
@@ -350,8 +509,22 @@ mixin ArtistModel on ConnectedPiecesModel {
   }
 
   // Loads the list of available artists from the repo.
-  void loadArtists() {
-    _availableArtists = ArtistRepository.loadArtists(Category.all);
+  Future<void> fetchArtists() async {
+    final List<Artist> _fetchedArtists = [];
+    try {
+      final http.Response response = await http.get(api + "artists");
+      final Map<String, dynamic> data = json.decode(response.body);
+
+      data['artists'].forEach((artistData) {
+        print(artistData['id']);
+        final artist = Artist.fromMap(artistData);
+        _fetchedArtists.add(artist);
+      });
+    } catch (error) {
+      print(error);
+    }
+    _availableArtists = _fetchedArtists;
+    //_availablePieces = PieceRepository.loadPieces(Category.all);
     notifyListeners();
   }
 }
