@@ -112,7 +112,8 @@ class PieceItem extends StatelessWidget {
                               ],
                             ),
                             onPressed: () {
-                              model.updateFavorite(model.authenticatedUser.id, piece.id);
+                              model.updateFavorite(
+                                  model.authenticatedUser.id, piece.id);
 
                               //print(model.getPieceById(piece.id).isFavorite) ;
                             },
@@ -132,7 +133,10 @@ class PieceItem extends StatelessWidget {
                               : Colors.black,
                         ),
                         onPressed: () {
-                          model.addPieceToCart(piece.id);
+                          model.updateCart(
+                            model.authenticatedUser.id,
+                            piece.id,true
+                          );
                         },
                       ),
                     ],

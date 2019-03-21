@@ -17,7 +17,7 @@ mixin ConnectedPiecesModel on Model {
   //List<Menu> _menus = [];
   int _selPieceId;
   bool _isLoading = false;
-  bool _isCategory = false;
+  bool _isFavorite = false;
 
   User _authenticatedUser;
   User _authenticatedUser1;
@@ -34,6 +34,34 @@ mixin ConnectedPiecesModel on Model {
 
 // The currently selected category of artipieces.
   Category _selectedCategory = Category.all;
+
+  // The IDs and quantities of products currently in the cart.
+  final Map<int, int> _piecesInCart = <int, int>{};
+
+  List<Piece> getPieces() {
+    if (_availablePieces == null) {
+      return <Piece>[];
+    }
+
+    if (_selectedCategory == Category.all) {
+      if (_isFavorite) {
+        return List<Piece>.from(
+            _availablePieces.where((Piece piece) => piece.isFavorite == true));
+      }
+      return List<Piece>.from(_availablePieces);
+    } else {
+      if (_isFavorite) {
+        return _availablePieces
+            .where((Piece piece) =>
+                piece.category == _selectedCategory && piece.isFavorite == true)
+            .toList();
+      } else {
+        return _availablePieces
+            .where((Piece piece) => piece.category == _selectedCategory)
+            .toList();
+      }
+    }
+  }
 }
 
 mixin PiecesModel on ConnectedPiecesModel {
@@ -130,11 +158,10 @@ mixin LoginModel on ConnectedPiecesModel {
     );
     final Map<String, dynamic> responseData = json.decode(response.body);
     bool hasError = true;
-    //String message = 'Something went wrong.';
-    //print(responseData);
+
     if (responseData.containsKey('token')) {
       hasError = false;
-      // message = 'Authentication succeeded!';
+
       _authenticatedUser = User(
           id: responseData['id'],
           email: email,
@@ -144,9 +171,7 @@ mixin LoginModel on ConnectedPiecesModel {
           phone: responseData['phone'],
           sex: responseData['sex']);
       _userSubject.add(true);
-
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-
       prefs.setString('id', responseData['id'].toString());
       prefs.setString('email', email);
       prefs.setString('token', responseData['token']);
@@ -157,7 +182,6 @@ mixin LoginModel on ConnectedPiecesModel {
     } else {
       //message = "Error";
       hasError = true;
-      print('oooooooooooo');
     }
     _isLoading = false;
     notifyListeners();
@@ -166,10 +190,6 @@ mixin LoginModel on ConnectedPiecesModel {
 
   Future<bool> signUpUser(
       String username, String email, String password) async {
-    print(username);
-    print(email);
-    print(password);
-
     _isLoading = true;
     final Map<String, dynamic> authData = {
       'email': email,
@@ -184,11 +204,10 @@ mixin LoginModel on ConnectedPiecesModel {
     );
     final Map<String, dynamic> responseData = json.decode(response.body);
     bool hasError = true;
-    //String message = 'Something went wrong.';
-    //print(responseData);
+
     if (responseData.containsKey('token')) {
       hasError = false;
-      // message = 'Authentication succeeded!';
+
       _authenticatedUser = User(
           id: responseData['id'],
           email: email,
@@ -232,8 +251,6 @@ mixin LoginModel on ConnectedPiecesModel {
 }
 
 mixin UtilityModel on ConnectedPiecesModel {
-  bool get isCategogry => _isCategory;
-
   Category get selectedCategory => _selectedCategory;
   //getters
   bool get isLoading {
@@ -242,22 +259,7 @@ mixin UtilityModel on ConnectedPiecesModel {
 }
 
 mixin PieceModel on ConnectedPiecesModel {
-  bool _isFavorite = false;
-
 // Returns a copy of the list of available products, filtered by category.
-  List<Piece> getPieces() {
-    if (_availablePieces == null) {
-      return <Piece>[];
-    }
-
-    if (_selectedCategory == Category.all) {
-      return List<Piece>.from(_availablePieces);
-    } else {
-      return _availablePieces
-          .where((Piece piece) => piece.category == _selectedCategory)
-          .toList();
-    }
-  }
 
   List<Piece> gePurchasedPieces() {
     if (_purchasedPieces == null) {
@@ -283,7 +285,6 @@ mixin PieceModel on ConnectedPiecesModel {
   }
 
   Future<void> updateFavorite(int userId, int pieceId) async {
-    
     _togglePieceFavoriteStatus(pieceId, false);
 
     final Map<String, dynamic> updatePieceLikesStatus = {
@@ -297,7 +298,6 @@ mixin PieceModel on ConnectedPiecesModel {
         body: json.encode(updatePieceLikesStatus),
         headers: {'Content-Type': 'application/json'},
       );
-      print(response.body);
     } catch (error) {
       _togglePieceFavoriteStatus(pieceId, true);
     }
@@ -314,16 +314,13 @@ mixin PieceModel on ConnectedPiecesModel {
     final bool isCurrentlyFavorite = piece.isFavorite;
 
     final bool newFavoriteStatus = !isCurrentlyFavorite;
-    print(newFavoriteStatus);
 
     int newLikeCount = piece.likeCounts;
-    print(newLikeCount);
+
     if (newFavoriteStatus) {
       newLikeCount++;
-      print(newLikeCount);
     } else {
       newLikeCount--;
-      print(newLikeCount);
     }
 
     final Piece updatedPiece = Piece(
@@ -358,16 +355,20 @@ mixin PieceModel on ConnectedPiecesModel {
           await http.get(api + "pieces/" + userId.toString());
       final Map<String, dynamic> data = json.decode(response.body);
       data['pieces'].forEach((pieceData) {
-        print(pieceData['id']);
         final piece = Piece.fromMap(pieceData);
         _fetchedPieces.add(piece);
       });
-      print(_fetchedPieces);
-    } catch (error) {
-      print(error);
-    }
+    } catch (error) {}
     _availablePieces = _fetchedPieces;
-    //_availablePieces = PieceRepository.loadPieces(Category.all);
+    _piecesInCart.clear();
+    _availablePieces.forEach((piece) {
+      final int photoIndex = _availablePieces.indexWhere((Piece p) {
+        return p.id == piece.id;
+      });
+      if (piece.cartStatus) {
+        _piecesInCart[photoIndex] = 1;
+      }
+    });
     notifyListeners();
   }
 
@@ -388,19 +389,13 @@ mixin PieceModel on ConnectedPiecesModel {
         final piece = Piece.fromMap(pieceData);
         _fetchedPurchasedPieces.add(piece);
       });
-      print(_fetchedPurchasedPieces);
-    } catch (error) {
-      print(error);
-    }
+    } catch (error) {}
     _purchasedPieces = _fetchedPurchasedPieces;
     notifyListeners();
   }
 }
 
 mixin CartModel on ConnectedPiecesModel {
-  // The IDs and quantities of products currently in the cart.
-  final Map<int, int> _piecesInCart = <int, int>{};
-
   Map<int, int> get piecesInCart => Map<int, int>.from(_piecesInCart);
 
   // Total number of items in the cart.
@@ -427,47 +422,67 @@ mixin CartModel on ConnectedPiecesModel {
   double get totalCost => subtotalCost + shippingCost + tax;
 
   // Removes everything from the cart.
-  void clearCart() {
+  void clearCart() async {
+    List<int> pieceIds = [];
+    _piecesInCart.keys.forEach((val) {
+      pieceIds.add(getPieces()[val].id);
+      updateCart(_authenticatedUser.id, getPieces()[val].id, false);
+    });
+
     _piecesInCart.clear();
     notifyListeners();
   }
 
   // Removes an item from the cart.
   void removeItemFromCart(int pieceId) {
-    _piecesInCart.remove(pieceId);
-    final Piece piece =
-        _availablePieces.firstWhere((Piece p) => p.id == pieceId);
-    final Piece updatedPiece = Piece(
-        cartStatus: false,
-        id: piece.id,
-        category: piece.category,
-        image: piece.image,
-        isFavorite: piece.isFavorite,
-        price: piece.price,
-        artistId: piece.artistId,
-        likeCounts: piece.likeCounts,
-        desc: piece.desc,
-        rate: piece.rate,
-        size: piece.size,
-        title: piece.title);
-    print(updatedPiece);
-    _availablePieces[pieceId] = updatedPiece;
+    final int photoIndex = _availablePieces.indexWhere((Piece p) {
+      return p.id == pieceId;
+    });
+
+    _piecesInCart.remove(photoIndex);
     notifyListeners();
   }
 
+//updateCart
+  Future<void> updateCart(int userId, int pieceId, bool sender) async {
+    if (sender) _addPieceToCart(pieceId, false);
+    if (!sender) _removeFromCart(pieceId, false);
+
+    final Map<String, dynamic> updatePieceCartStatus = {
+      "user_id": userId,
+      "piece_id": pieceId
+    };
+
+    try {
+      http.Response response = await http.post(
+        api + "piece/cart",
+        body: json.encode(updatePieceCartStatus),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (error) {
+      if (sender) _addPieceToCart(pieceId, true);
+      if (!sender) _removeFromCart(pieceId, true);
+    }
+  }
+
   // Adds a photo to the cart.
-  void addPieceToCart(int pieceId) {
+  void _addPieceToCart(int pieceId, bool error) {
     final Piece piece =
         _availablePieces.firstWhere((Piece piece) => piece.id == pieceId);
 
-    if (piece.cartStatus) {
-      _piecesInCart.remove(pieceId);
-    } else {
-      _piecesInCart[pieceId] = 1;
-    }
+    final int photoIndex = _availablePieces.indexWhere((Piece p) {
+      return p.id == pieceId;
+    });
 
     final bool isCurrentlyInCart = piece.cartStatus;
     final bool newCartStatus = !isCurrentlyInCart;
+
+    if (piece.cartStatus) {
+      _piecesInCart.remove(photoIndex);
+    } else {
+      _piecesInCart[photoIndex] = 1;
+    }
+
     final Piece updatedPiece = Piece(
         cartStatus: newCartStatus,
         id: piece.id,
@@ -482,9 +497,36 @@ mixin CartModel on ConnectedPiecesModel {
         size: piece.size,
         title: piece.title);
 
-    _availablePieces[pieceId] = updatedPiece;
+    _availablePieces[photoIndex] = updatedPiece;
 
     notifyListeners();
+  }
+
+  void _removeFromCart(int pieceId, bool error) {
+    final Piece piece =
+        _availablePieces.firstWhere((Piece piece) => piece.id == pieceId);
+
+    final int photoIndex = _availablePieces.indexWhere((Piece p) {
+      return p.id == pieceId;
+    });
+
+    final bool newCartStatus = false;
+
+    final Piece updatedPiece = Piece(
+        cartStatus: newCartStatus,
+        id: piece.id,
+        category: piece.category,
+        image: piece.image,
+        isFavorite: piece.isFavorite,
+        price: piece.price,
+        artistId: piece.artistId,
+        likeCounts: piece.likeCounts,
+        desc: piece.desc,
+        rate: piece.rate,
+        size: piece.size,
+        title: piece.title);
+
+    _availablePieces[photoIndex] = updatedPiece;
   }
 
   @override
@@ -516,13 +558,10 @@ mixin ArtistModel on ConnectedPiecesModel {
       final Map<String, dynamic> data = json.decode(response.body);
 
       data['artists'].forEach((artistData) {
-        print(artistData['id']);
         final artist = Artist.fromMap(artistData);
         _fetchedArtists.add(artist);
       });
-    } catch (error) {
-      print(error);
-    }
+    } catch (error) {}
     _availableArtists = _fetchedArtists;
     //_availablePieces = PieceRepository.loadPieces(Category.all);
     notifyListeners();

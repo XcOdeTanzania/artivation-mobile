@@ -1,6 +1,7 @@
 import 'package:artivation/models/piece.dart';
 import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image/network.dart';
 import 'package:intl/intl.dart';
 
 const double _leftColumnWidth = 60.0;
@@ -45,11 +46,12 @@ class ShoppingCartRow extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Image.asset(
-                        piece.image,
-                        fit: BoxFit.cover,
+                      FadeInImage(
                         width: 75.0,
                         height: 75.0,
+                        fit: BoxFit.cover,
+                        image: NetworkImageWithRetry(piece.image),
+                        placeholder: AssetImage('assets/img/placeholder.png'),
                       ),
                       const SizedBox(width: 16.0),
                       Expanded(

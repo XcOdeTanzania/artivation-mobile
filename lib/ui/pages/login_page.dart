@@ -8,9 +8,11 @@ import 'package:artivation/utils/bubble_indication_painter.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key key, this.model}) : super(key: key);
+  LoginPage({Key key, @required this.model})
+      : super(key: key);
 
   final MainModel model;
+ 
 
   @override
   _LoginPageState createState() => _LoginPageState();

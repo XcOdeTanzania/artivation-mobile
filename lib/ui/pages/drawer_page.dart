@@ -1,6 +1,7 @@
 import 'package:artivation/scoped-models/main.dart';
 import 'package:artivation/ui/pages/artist_page.dart';
 import 'package:artivation/ui/pages/cart_page.dart';
+import 'package:artivation/ui/pages/login_page.dart';
 import 'package:artivation/ui/pages/profile_page.dart';
 import 'package:artivation/ui/pages/purchased_page.dart';
 import 'package:artivation/ui/pages/settings_page.dart';
@@ -264,7 +265,13 @@ class _DrawerPageState extends State<DrawerPage> with TickerProviderStateMixin {
                                     leading: const Icon(Icons.add,
                                         color: UIData.primaryColor),
                                     title: const Text('Add account'),
-                                    onTap: _showNotImplementedMessage,
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  LoginPage(model: model)));
+                                    },
                                   ),
                                   ListTile(
                                     leading: const Icon(Icons.settings,

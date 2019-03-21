@@ -17,10 +17,12 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     return model.piecesInCart.keys
         .map(
           (int id) => ShoppingCartRow(
-                piece: model.getPieceById(id),
+                piece: model.getPieces()[id],
                 quantity: model.piecesInCart[id],
                 onPressed: () {
-                  model.removeItemFromCart(id);
+                  //  model.removeItemFromCart( model.getPieces()[id].id);
+                  model.updateCart(model.authenticatedUser.id,
+                      model.getPieces()[id].id, true);
                 },
               ),
         )

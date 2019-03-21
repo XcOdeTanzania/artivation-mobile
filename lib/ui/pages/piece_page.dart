@@ -10,6 +10,7 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:badges/badges.dart';
 
+
 class PiecePage extends StatefulWidget {
   const PiecePage({Key key, this.model, this.menuController}) : super(key: key);
   final MainModel model;
@@ -49,18 +50,12 @@ class PiecePageState extends State<PiecePage> {
                     fontSize: 18.0,
                     fontFamily: "WorkSansSemiBold")),
             actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () {
-                  print('searching');
-                },
-              ),
               BadgeIconButton(
-                  itemCount: model.totalCartQuantity, // required
-                  icon: Icon(Icons.shopping_cart), // required
-                  badgeColor: Colors.red, // default: Colors.red
-                  badgeTextColor: Colors.white, // default: Colors.white
-                  hideZeroCount: true, // default: true
+                  itemCount: model.totalCartQuantity, 
+                  icon: Icon(Icons.shopping_cart), 
+                  badgeColor: Colors.red, 
+                  badgeTextColor: Colors.white, 
+                  hideZeroCount: true, 
                   onPressed: () {
                     Navigator.push(
                         context,
