@@ -10,7 +10,6 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:badges/badges.dart';
 
-
 class PiecePage extends StatefulWidget {
   const PiecePage({Key key, this.model, this.menuController}) : super(key: key);
   final MainModel model;
@@ -41,6 +40,7 @@ class PiecePageState extends State<PiecePage> {
 
     return ScopedModelDescendant(
       builder: (BuildContext context, Widget child, MainModel model) {
+        final _height = MediaQuery.of(context).size.height / 3;
         return Scaffold(
           appBar: AppBar(
             backgroundColor: UIData.primaryColor,
@@ -51,11 +51,11 @@ class PiecePageState extends State<PiecePage> {
                     fontFamily: "WorkSansSemiBold")),
             actions: <Widget>[
               BadgeIconButton(
-                  itemCount: model.totalCartQuantity, 
-                  icon: Icon(Icons.shopping_cart), 
-                  badgeColor: Colors.red, 
-                  badgeTextColor: Colors.white, 
-                  hideZeroCount: true, 
+                  itemCount: model.totalCartQuantity,
+                  icon: Icon(Icons.shopping_cart),
+                  badgeColor: Colors.red,
+                  badgeTextColor: Colors.white,
+                  hideZeroCount: true,
                   onPressed: () {
                     Navigator.push(
                         context,
@@ -130,20 +130,38 @@ class PiecePageState extends State<PiecePage> {
             onRefresh: _handleRefresh,
             color: UIData.primaryColor,
             showChildOpacityTransition: false,
-            child: ListView.builder(
-              itemCount: model.getPieces().length,
-              itemExtent: PieceItem.height,
-              itemBuilder: (context, index) {
-                return Container(
-                  margin:
-                      const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-                  child: PieceItem(
-                    piece: model.getPieces()[index],
-                    shape: _shape,
-                  ),
-                );
-              },
-            ), // scroll view
+            child: model.getPieces().length > 0
+                ? ListView.builder(
+                    itemCount: model.getPieces().length,
+                    itemExtent: PieceItem.height,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        margin: const EdgeInsets.only(
+                            top: 8.0, left: 8.0, right: 8.0),
+                        child: PieceItem(
+                          piece: model.getPieces()[index],
+                          shape: _shape,
+                        ),
+                      );
+                    },
+                  )
+                : ListView(
+                    children: <Widget>[
+                      SizedBox(
+                        height: _height,
+                      ),
+                      Center(
+                        child: Text(
+                          model.selectedCategory
+                                  .toString()
+                                  .replaceAll('Category.', '')
+                                  .toUpperCase() +
+                              ' HAS NO DATA YET',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  ), // scroll view
           ),
           drawer: DrawerPage(),
         );

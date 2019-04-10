@@ -8,11 +8,9 @@ import 'package:artivation/utils/bubble_indication_painter.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key key, @required this.model})
-      : super(key: key);
+  LoginPage({Key key, @required this.model}) : super(key: key);
 
   final MainModel model;
- 
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -21,6 +19,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _formKey = GlobalKey<FormState>();
+  final _signupFormKey = GlobalKey<FormState>();
 
   final FocusNode myFocusNodeEmailLogin = FocusNode();
   final FocusNode myFocusNodePasswordLogin = FocusNode();
@@ -214,268 +214,293 @@ class _LoginPageState extends State<LoginPage>
     return ScopedModelDescendant(
       builder: (BuildContext context, Widget child, MainModel model) {
         return Container(
-          padding: EdgeInsets.only(top: 23.0),
-          child: Column(
-            children: <Widget>[
-              Stack(
-                alignment: Alignment.topCenter,
-                overflow: Overflow.visible,
+            padding: EdgeInsets.only(top: 23.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
                 children: <Widget>[
-                  Card(
-                    elevation: 2.0,
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Container(
-                      width: 300.0,
-                      height: 190.0,
-                      child: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 20.0,
-                                bottom: 20.0,
-                                left: 25.0,
-                                right: 25.0),
-                            child: TextField(
-                              focusNode: myFocusNodeEmailLogin,
-                              controller: loginEmailController,
-                              keyboardType: TextInputType.emailAddress,
-                              style: TextStyle(
-                                  fontFamily: "WorkSansSemiBold",
-                                  fontSize: 16.0,
-                                  color: Colors.black),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                icon: Icon(
-                                  FontAwesomeIcons.envelope,
-                                  color: Colors.black,
-                                  size: 22.0,
-                                ),
-                                hintText: "Email Address",
-                                hintStyle: TextStyle(
-                                    fontFamily: "WorkSansSemiBold",
-                                    fontSize: 17.0),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 250.0,
-                            height: 1.0,
-                            color: Colors.grey[400],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 20.0,
-                                bottom: 20.0,
-                                left: 25.0,
-                                right: 25.0),
-                            child: TextField(
-                              focusNode: myFocusNodePasswordLogin,
-                              controller: loginPasswordController,
-                              obscureText: _obscureTextLogin,
-                              style: TextStyle(
-                                  fontFamily: "WorkSansSemiBold",
-                                  fontSize: 16.0,
-                                  color: Colors.black),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                icon: Icon(
-                                  FontAwesomeIcons.lock,
-                                  size: 22.0,
-                                  color: Colors.black,
-                                ),
-                                hintText: "Password",
-                                hintStyle: TextStyle(
-                                    fontFamily: "WorkSansSemiBold",
-                                    fontSize: 17.0),
-                                suffixIcon: GestureDetector(
-                                  onTap: _toggleLogin,
-                                  child: Icon(
-                                    _obscureTextLogin
-                                        ? FontAwesomeIcons.eye
-                                        : FontAwesomeIcons.eyeSlash,
-                                    size: 15.0,
-                                    color: Colors.black,
+                  Stack(
+                    alignment: Alignment.topCenter,
+                    overflow: Overflow.visible,
+                    children: <Widget>[
+                      Card(
+                        elevation: 2.0,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Container(
+                          width: 300.0,
+                          height: 230.0,
+                          child: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    top: 20.0,
+                                    bottom: 20.0,
+                                    left: 25.0,
+                                    right: 25.0),
+                                child: TextFormField(
+                                  focusNode: myFocusNodeEmailLogin,
+                                  controller: loginEmailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  style: TextStyle(
+                                      fontFamily: "WorkSansSemiBold",
+                                      fontSize: 16.0,
+                                      color: Colors.black),
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Please enter email';
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    icon: Icon(
+                                      FontAwesomeIcons.envelope,
+                                      color: Colors.black,
+                                      size: 22.0,
+                                    ),
+                                    hintText: "Email Address",
+                                    hintStyle: TextStyle(
+                                        fontFamily: "WorkSansSemiBold",
+                                        fontSize: 17.0),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 170.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: Theme.Colors.loginGradientStart,
-                          offset: Offset(1.0, 6.0),
-                          blurRadius: 20.0,
-                        ),
-                        BoxShadow(
-                          color: Theme.Colors.loginGradientEnd,
-                          offset: Offset(1.0, 6.0),
-                          blurRadius: 20.0,
-                        ),
-                      ],
-                      gradient: LinearGradient(
-                          colors: [
-                            Theme.Colors.loginGradientEnd,
-                            Theme.Colors.loginGradientStart
-                          ],
-                          begin: const FractionalOffset(0.2, 0.2),
-                          end: const FractionalOffset(1.0, 1.0),
-                          stops: [0.0, 1.0],
-                          tileMode: TileMode.clamp),
-                    ),
-                    child: MaterialButton(
-                        highlightColor: Colors.transparent,
-                        splashColor: Theme.Colors.loginGradientEnd,
-                        //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 42.0),
-                          child: widget.model.isLoading
-                              ? CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                                )
-                              : Text(
-                                  "LOGIN",
+                              Container(
+                                width: 250.0,
+                                height: 1.0,
+                                color: Colors.grey[400],
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    top: 20.0,
+                                    bottom: 20.0,
+                                    left: 25.0,
+                                    right: 25.0),
+                                child: TextFormField(
+                                  focusNode: myFocusNodePasswordLogin,
+                                  controller: loginPasswordController,
+                                  obscureText: _obscureTextLogin,
                                   style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 25.0,
-                                      fontFamily: "WorkSansBold"),
+                                      fontFamily: "WorkSansSemiBold",
+                                      fontSize: 16.0,
+                                      color: Colors.black),
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Please enter password';
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    icon: Icon(
+                                      FontAwesomeIcons.lock,
+                                      size: 22.0,
+                                      color: Colors.black,
+                                    ),
+                                    hintText: "Password",
+                                    hintStyle: TextStyle(
+                                        fontFamily: "WorkSansSemiBold",
+                                        fontSize: 17.0),
+                                    suffixIcon: GestureDetector(
+                                      onTap: _toggleLogin,
+                                      child: Icon(
+                                        _obscureTextLogin
+                                            ? FontAwesomeIcons.eye
+                                            : FontAwesomeIcons.eyeSlash,
+                                        size: 15.0,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
                                 ),
+                              ),
+                            ],
+                          ),
                         ),
-                        onPressed: () {
-                          if (loginEmailController.text.isNotEmpty &&
-                              loginPasswordController.text.isNotEmpty) {
-                            model
-                                .signInUser(loginEmailController.text,
-                                    loginPasswordController.text)
-                                .then((val) {
-                              if (!val) {
-                                loginEmailController.clear();
-                                loginPasswordController.clear();
-                                Navigator.pushReplacementNamed(context, '/');
-                              } else {
-                                print('Error while singing in');
-                              }
-                            });
-                          }
-                        }),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 10.0),
-                child: FlatButton(
-                    onPressed: () {},
-                    child: Text(
-                      "Forgot Password?",
-                      style: TextStyle(
-                          decoration: TextDecoration.underline,
-                          color: Colors.white,
-                          fontSize: 16.0,
-                          fontFamily: "WorkSansMedium"),
-                    )),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                            colors: [
-                              Colors.white10,
-                              Colors.white,
-                            ],
-                            begin: const FractionalOffset(0.0, 0.0),
-                            end: const FractionalOffset(1.0, 1.0),
-                            stops: [0.0, 1.0],
-                            tileMode: TileMode.clamp),
                       ),
-                      width: 100.0,
-                      height: 1.0,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 15.0, right: 15.0),
-                      child: Text(
-                        "Or",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.0,
-                            fontFamily: "WorkSansMedium"),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                            colors: [
-                              Colors.white,
-                              Colors.white10,
-                            ],
-                            begin: const FractionalOffset(0.0, 0.0),
-                            end: const FractionalOffset(1.0, 1.0),
-                            stops: [0.0, 1.0],
-                            tileMode: TileMode.clamp),
-                      ),
-                      width: 100.0,
-                      height: 1.0,
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 10.0, right: 40.0),
-                    child: GestureDetector(
-                      onTap: () => showInSnackBar("Facebook button pressed"),
-                      child: Container(
-                        padding: const EdgeInsets.all(15.0),
+                      Container(
+                        margin: EdgeInsets.only(top: 170.0),
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                          boxShadow: <BoxShadow>[
+                            BoxShadow(
+                              color: Theme.Colors.loginGradientStart,
+                              offset: Offset(1.0, 6.0),
+                              blurRadius: 20.0,
+                            ),
+                            BoxShadow(
+                              color: Theme.Colors.loginGradientEnd,
+                              offset: Offset(1.0, 6.0),
+                              blurRadius: 20.0,
+                            ),
+                          ],
+                          gradient: LinearGradient(
+                              colors: [
+                                Theme.Colors.loginGradientEnd,
+                                Theme.Colors.loginGradientStart
+                              ],
+                              begin: const FractionalOffset(0.2, 0.2),
+                              end: const FractionalOffset(1.0, 1.0),
+                              stops: [0.0, 1.0],
+                              tileMode: TileMode.clamp),
                         ),
-                        child: Icon(
-                          FontAwesomeIcons.facebookF,
-                          color: Color(0xFF0084ff),
-                        ),
+                        child: MaterialButton(
+                            highlightColor: Colors.transparent,
+                            splashColor: Theme.Colors.loginGradientEnd,
+                            //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 42.0),
+                              child: widget.model.isLoading
+                                  ? CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    )
+                                  : Text(
+                                      "LOGIN",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 25.0,
+                                          fontFamily: "WorkSansBold"),
+                                    ),
+                            ),
+                            onPressed: () {
+                              if (_formKey.currentState.validate()) {
+                                if (loginEmailController.text.isNotEmpty &&
+                                    loginPasswordController.text.isNotEmpty) {
+                                  model
+                                      .signInUser(loginEmailController.text,
+                                          loginPasswordController.text)
+                                      .then((val) {
+                                    if (!val) {
+                                      loginEmailController.clear();
+                                      loginPasswordController.clear();
+                                      Navigator.pushReplacementNamed(
+                                          context, '/');
+                                    } else {
+                                      print('Error while singing in');
+                                      Scaffold.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: ListTile(
+                                        leading: Icon(
+                                          Icons.error,
+                                          color: Colors.red,
+                                        ),
+                                        title: Text('Wrong Password or Email '),
+                                      )));
+                                    }
+                                  });
+                                }
+                              }
+                            }),
                       ),
-                    ),
+                    ],
                   ),
                   Padding(
                     padding: EdgeInsets.only(top: 10.0),
-                    child: GestureDetector(
-                      onTap: () => showInSnackBar("Google button pressed"),
-                      child: Container(
-                        padding: const EdgeInsets.all(15.0),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
+                    child: FlatButton(
+                        onPressed: () {},
+                        child: Text(
+                          "Forgot Password?",
+                          style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Colors.white,
+                              fontSize: 16.0,
+                              fontFamily: "WorkSansMedium"),
+                        )),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                colors: [
+                                  Colors.white10,
+                                  Colors.white,
+                                ],
+                                begin: const FractionalOffset(0.0, 0.0),
+                                end: const FractionalOffset(1.0, 1.0),
+                                stops: [0.0, 1.0],
+                                tileMode: TileMode.clamp),
+                          ),
+                          width: 100.0,
+                          height: 1.0,
                         ),
-                        child: Icon(
-                          FontAwesomeIcons.google,
-                          color: Color(0xFF0084ff),
+                        Padding(
+                          padding: EdgeInsets.only(left: 15.0, right: 15.0),
+                          child: Text(
+                            "Or",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                                fontFamily: "WorkSansMedium"),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                colors: [
+                                  Colors.white,
+                                  Colors.white10,
+                                ],
+                                begin: const FractionalOffset(0.0, 0.0),
+                                end: const FractionalOffset(1.0, 1.0),
+                                stops: [0.0, 1.0],
+                                tileMode: TileMode.clamp),
+                          ),
+                          width: 100.0,
+                          height: 1.0,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(top: 10.0, right: 40.0),
+                        child: GestureDetector(
+                          onTap: () =>
+                              showInSnackBar("Facebook button pressed"),
+                          child: Container(
+                            padding: const EdgeInsets.all(15.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: Icon(
+                              FontAwesomeIcons.facebookF,
+                              color: Color(0xFF0084ff),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 10.0),
+                        child: GestureDetector(
+                          onTap: () => showInSnackBar("Google button pressed"),
+                          child: Container(
+                            padding: const EdgeInsets.all(15.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: Icon(
+                              FontAwesomeIcons.google,
+                              color: Color(0xFF0084ff),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        );
+            ));
       },
     );
   }
@@ -485,237 +510,286 @@ class _LoginPageState extends State<LoginPage>
       builder: (BuildContext context, Widget child, MainModel model) {
         return Container(
           padding: EdgeInsets.only(top: 23.0),
-          child: Column(
-            children: <Widget>[
-              Stack(
-                alignment: Alignment.topCenter,
-                overflow: Overflow.visible,
-                children: <Widget>[
-                  Card(
-                    elevation: 2.0,
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Container(
-                      width: 300.0,
-                      height: 360.0,
-                      child: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 20.0,
-                                bottom: 20.0,
-                                left: 25.0,
-                                right: 25.0),
-                            child: TextField(
-                              focusNode: myFocusNodeName,
-                              controller: signupNameController,
-                              keyboardType: TextInputType.text,
-                              textCapitalization: TextCapitalization.words,
-                              style: TextStyle(
-                                  fontFamily: "WorkSansSemiBold",
-                                  fontSize: 16.0,
-                                  color: Colors.black),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                icon: Icon(
-                                  FontAwesomeIcons.user,
-                                  color: Colors.black,
-                                ),
-                                hintText: "Name",
-                                hintStyle: TextStyle(
+          child: Form(
+            key: _signupFormKey,
+            child: Column(
+              children: <Widget>[
+                Stack(
+                  alignment: Alignment.topCenter,
+                  overflow: Overflow.visible,
+                  children: <Widget>[
+                    Card(
+                      elevation: 2.0,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Container(
+                        width: 300.0,
+                        height: 450.0,
+                        child: Column(
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  top: 20.0,
+                                  bottom: 20.0,
+                                  left: 25.0,
+                                  right: 25.0),
+                              child: TextFormField(
+                                focusNode: myFocusNodeName,
+                                controller: signupNameController,
+                                keyboardType: TextInputType.text,
+                                textCapitalization: TextCapitalization.words,
+                                style: TextStyle(
                                     fontFamily: "WorkSansSemiBold",
-                                    fontSize: 16.0),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 250.0,
-                            height: 1.0,
-                            color: Colors.grey[400],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 20.0,
-                                bottom: 20.0,
-                                left: 25.0,
-                                right: 25.0),
-                            child: TextField(
-                              focusNode: myFocusNodeEmail,
-                              controller: signupEmailController,
-                              keyboardType: TextInputType.emailAddress,
-                              style: TextStyle(
-                                  fontFamily: "WorkSansSemiBold",
-                                  fontSize: 16.0,
-                                  color: Colors.black),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                icon: Icon(
-                                  FontAwesomeIcons.envelope,
-                                  color: Colors.black,
-                                ),
-                                hintText: "Email Address",
-                                hintStyle: TextStyle(
-                                    fontFamily: "WorkSansSemiBold",
-                                    fontSize: 16.0),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 250.0,
-                            height: 1.0,
-                            color: Colors.grey[400],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 20.0,
-                                bottom: 20.0,
-                                left: 25.0,
-                                right: 25.0),
-                            child: TextField(
-                              focusNode: myFocusNodePassword,
-                              controller: signupPasswordController,
-                              obscureText: _obscureTextSignup,
-                              style: TextStyle(
-                                  fontFamily: "WorkSansSemiBold",
-                                  fontSize: 16.0,
-                                  color: Colors.black),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                icon: Icon(
-                                  FontAwesomeIcons.lock,
-                                  color: Colors.black,
-                                ),
-                                hintText: "Password",
-                                hintStyle: TextStyle(
-                                    fontFamily: "WorkSansSemiBold",
-                                    fontSize: 16.0),
-                                suffixIcon: GestureDetector(
-                                  onTap: _toggleSignup,
-                                  child: Icon(
-                                    _obscureTextSignup
-                                        ? FontAwesomeIcons.eye
-                                        : FontAwesomeIcons.eyeSlash,
-                                    size: 15.0,
+                                    fontSize: 16.0,
+                                    color: Colors.black),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  icon: Icon(
+                                    FontAwesomeIcons.user,
                                     color: Colors.black,
                                   ),
+                                  hintText: "Name",
+                                  hintStyle: TextStyle(
+                                      fontFamily: "WorkSansSemiBold",
+                                      fontSize: 16.0),
                                 ),
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Please enter your name';
+                                  }
+                                },
                               ),
                             ),
-                          ),
-                          Container(
-                            width: 250.0,
-                            height: 1.0,
-                            color: Colors.grey[400],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 20.0,
-                                bottom: 20.0,
-                                left: 25.0,
-                                right: 25.0),
-                            child: TextField(
-                              controller: signupConfirmPasswordController,
-                              obscureText: _obscureTextSignupConfirm,
-                              style: TextStyle(
-                                  fontFamily: "WorkSansSemiBold",
-                                  fontSize: 16.0,
-                                  color: Colors.black),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                icon: Icon(
-                                  FontAwesomeIcons.lock,
-                                  color: Colors.black,
-                                ),
-                                hintText: "Confirmation",
-                                hintStyle: TextStyle(
+                            Container(
+                              width: 250.0,
+                              height: 1.0,
+                              color: Colors.grey[400],
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  top: 20.0,
+                                  bottom: 20.0,
+                                  left: 25.0,
+                                  right: 25.0),
+                              child: TextFormField(
+                                focusNode: myFocusNodeEmail,
+                                controller: signupEmailController,
+                                keyboardType: TextInputType.emailAddress,
+                                style: TextStyle(
                                     fontFamily: "WorkSansSemiBold",
-                                    fontSize: 16.0),
-                                suffixIcon: GestureDetector(
-                                  onTap: _toggleSignupConfirm,
-                                  child: Icon(
-                                    _obscureTextSignupConfirm
-                                        ? FontAwesomeIcons.eye
-                                        : FontAwesomeIcons.eyeSlash,
-                                    size: 15.0,
+                                    fontSize: 16.0,
+                                    color: Colors.black),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  icon: Icon(
+                                    FontAwesomeIcons.envelope,
                                     color: Colors.black,
                                   ),
+                                  hintText: "Email Address",
+                                  hintStyle: TextStyle(
+                                      fontFamily: "WorkSansSemiBold",
+                                      fontSize: 16.0),
                                 ),
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Please enter  an email';
+                                  }
+                                },
                               ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              width: 250.0,
+                              height: 1.0,
+                              color: Colors.grey[400],
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  top: 20.0,
+                                  bottom: 20.0,
+                                  left: 25.0,
+                                  right: 25.0),
+                              child: TextFormField(
+                                focusNode: myFocusNodePassword,
+                                controller: signupPasswordController,
+                                obscureText: _obscureTextSignup,
+                                style: TextStyle(
+                                    fontFamily: "WorkSansSemiBold",
+                                    fontSize: 16.0,
+                                    color: Colors.black),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  icon: Icon(
+                                    FontAwesomeIcons.lock,
+                                    color: Colors.black,
+                                  ),
+                                  hintText: "Password",
+                                  hintStyle: TextStyle(
+                                      fontFamily: "WorkSansSemiBold",
+                                      fontSize: 16.0),
+                                  suffixIcon: GestureDetector(
+                                    onTap: _toggleSignup,
+                                    child: Icon(
+                                      _obscureTextSignup
+                                          ? FontAwesomeIcons.eye
+                                          : FontAwesomeIcons.eyeSlash,
+                                      size: 15.0,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Please enter password';
+                                  }
+                                },
+                              ),
+                            ),
+                            Container(
+                              width: 250.0,
+                              height: 1.0,
+                              color: Colors.grey[400],
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  top: 20.0,
+                                  bottom: 20.0,
+                                  left: 25.0,
+                                  right: 25.0),
+                              child: TextFormField(
+                                controller: signupConfirmPasswordController,
+                                obscureText: _obscureTextSignupConfirm,
+                                style: TextStyle(
+                                    fontFamily: "WorkSansSemiBold",
+                                    fontSize: 16.0,
+                                    color: Colors.black),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  icon: Icon(
+                                    FontAwesomeIcons.lock,
+                                    color: Colors.black,
+                                  ),
+                                  hintText: "Confirmation",
+                                  hintStyle: TextStyle(
+                                      fontFamily: "WorkSansSemiBold",
+                                      fontSize: 16.0),
+                                  suffixIcon: GestureDetector(
+                                    onTap: _toggleSignupConfirm,
+                                    child: Icon(
+                                      _obscureTextSignupConfirm
+                                          ? FontAwesomeIcons.eye
+                                          : FontAwesomeIcons.eyeSlash,
+                                      size: 15.0,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Please enter password';
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 340.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: Theme.Colors.loginGradientStart,
-                          offset: Offset(1.0, 6.0),
-                          blurRadius: 20.0,
-                        ),
-                        BoxShadow(
-                          color: Theme.Colors.loginGradientEnd,
-                          offset: Offset(1.0, 6.0),
-                          blurRadius: 20.0,
-                        ),
-                      ],
-                      gradient: LinearGradient(
-                          colors: [
-                            Theme.Colors.loginGradientEnd,
-                            Theme.Colors.loginGradientStart
-                          ],
-                          begin: const FractionalOffset(0.2, 0.2),
-                          end: const FractionalOffset(1.0, 1.0),
-                          stops: [0.0, 1.0],
-                          tileMode: TileMode.clamp),
-                    ),
-                    child: MaterialButton(
-                        highlightColor: Colors.transparent,
-                        splashColor: Theme.Colors.loginGradientEnd,
-                        //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 42.0),
-                          child: Text(
-                            "SIGN UP",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 25.0,
-                                fontFamily: "WorkSansBold"),
+                    Container(
+                      margin: EdgeInsets.only(top: 340.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: Theme.Colors.loginGradientStart,
+                            offset: Offset(1.0, 6.0),
+                            blurRadius: 20.0,
                           ),
-                        ),
-                        onPressed: () {
-                          if (signupPasswordController.text ==
-                              signupConfirmPasswordController.text) {
-                            if (signupEmailController.text.isNotEmpty &&
-                                signupNameController.text.isNotEmpty) {
-                              model
-                                  .signUpUser(
-                                      signupNameController.text,
-                                      signupEmailController.text,
-                                      signupPasswordController.text)
-                                  .then((val) {
-                                if (!val) {
-                                  loginEmailController.clear();
-                                  loginPasswordController.clear();
-                                  Navigator.pushReplacementNamed(context, '/');
-                                } else {
-                                  print('Error while singing in');
+                          BoxShadow(
+                            color: Theme.Colors.loginGradientEnd,
+                            offset: Offset(1.0, 6.0),
+                            blurRadius: 20.0,
+                          ),
+                        ],
+                        gradient: LinearGradient(
+                            colors: [
+                              Theme.Colors.loginGradientEnd,
+                              Theme.Colors.loginGradientStart
+                            ],
+                            begin: const FractionalOffset(0.2, 0.2),
+                            end: const FractionalOffset(1.0, 1.0),
+                            stops: [0.0, 1.0],
+                            tileMode: TileMode.clamp),
+                      ),
+                      child: MaterialButton(
+                          highlightColor: Colors.transparent,
+                          splashColor: Theme.Colors.loginGradientEnd,
+                          //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 42.0),
+                            child: widget.model.isLoading
+                                ? CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  )
+                                : Text(
+                                    "SIGN UP",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 25.0,
+                                        fontFamily: "WorkSansBold"),
+                                  ),
+                          ),
+                          onPressed: () {
+                            if (_signupFormKey.currentState.validate()) {
+                              if (signupPasswordController.text ==
+                                  signupConfirmPasswordController.text) {
+                                if (signupEmailController.text.isNotEmpty &&
+                                    signupNameController.text.isNotEmpty) {
+                                  model
+                                      .signUpUser(
+                                          signupNameController.text,
+                                          signupEmailController.text,
+                                          signupPasswordController.text)
+                                      .then((val) {
+                                    if (!val) {
+                                      loginEmailController.clear();
+                                      loginPasswordController.clear();
+                                      Navigator.pushReplacementNamed(
+                                          context, '/');
+                                    } else {
+                                      print('Error while singing in');
+                                      Scaffold.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: ListTile(
+                                        leading: Icon(
+                                          Icons.error,
+                                          color: Colors.red,
+                                        ),
+                                        title: Text('Error while signing up'),
+                                      )));
+                                    }
+                                  });
                                 }
-                              });
+                              } else {
+                                Scaffold.of(context).showSnackBar(SnackBar(
+                                    content: ListTile(
+                                  leading: Icon(
+                                    Icons.error,
+                                    color: Colors.red,
+                                  ),
+                                  title: Text('Passwords do not match'),
+                                )));
+                              }
                             }
-                          }
-                        }),
-                  ),
-                ],
-              ),
-            ],
+                          }),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },

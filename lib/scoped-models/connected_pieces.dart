@@ -37,6 +37,7 @@ mixin ConnectedPiecesModel on Model {
 
   // The IDs and quantities of products currently in the cart.
   final Map<int, int> _piecesInCart = <int, int>{};
+  
 
   List<Piece> getPieces() {
     if (_availablePieces == null) {
@@ -349,16 +350,26 @@ mixin PieceModel on ConnectedPiecesModel {
 
   // Loads the list of available products from the repo.
   Future<void> fetchPieces(int userId) async {
+
+    print(api + "pieces/" + userId.toString());
     final List<Piece> _fetchedPieces = [];
     try {
       final http.Response response =
           await http.get(api + "pieces/" + userId.toString());
+
       final Map<String, dynamic> data = json.decode(response.body);
+      print('MMMMMMMMMMMMMMMMMMHHHHHHHHHHHHHHHH');
+       print( data['pieces']);
       data['pieces'].forEach((pieceData) {
         final piece = Piece.fromMap(pieceData);
+      
         _fetchedPieces.add(piece);
       });
-    } catch (error) {}
+     
+    } catch (error) {
+      print(error
+      );
+    }
     _availablePieces = _fetchedPieces;
     _piecesInCart.clear();
     _availablePieces.forEach((piece) {
@@ -369,6 +380,7 @@ mixin PieceModel on ConnectedPiecesModel {
         _piecesInCart[photoIndex] = 1;
       }
     });
+    print(_availablePieces);
     notifyListeners();
   }
 
@@ -384,12 +396,15 @@ mixin PieceModel on ConnectedPiecesModel {
       final http.Response response =
           await http.get(api + "pieces/purchased/" + userId.toString());
       final Map<String, dynamic> data = json.decode(response.body);
-
+     print(data);
+     
       data['pieces'].forEach((pieceData) {
         final piece = Piece.fromMap(pieceData);
         _fetchedPurchasedPieces.add(piece);
       });
-    } catch (error) {}
+    } catch (error) {
+      print("noooooooooooooooooooo");
+    }
     _purchasedPieces = _fetchedPurchasedPieces;
     notifyListeners();
   }
