@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:artivation/scoped-models/main.dart';
 import 'package:artivation/ui/widgets/cart/shopping_cart_row.dart';
 import 'package:artivation/ui/widgets/cart/shopping_cart_summary.dart';
 import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:artivation/api/api.dart';
+import 'dart:convert';
+import '../pages/pay_with_pesapal_page.dart';
 
 const double _leftColumnWidth = 60.0;
 
@@ -89,7 +96,23 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                         ),
                       ),
                       onPressed: () {
-                        model.clearCart();
+                        //initializePayment(2).then((String response){
+//                          String url = '${responseMap['scheme']}://${responseMap['host']}${responseMap['path']}?${responseMap['query']}';
+//                          print('Scheme: ${responseMap['scheme']}');
+//                          print('Host: ${responseMap['host']}');
+//                          print('Path: ${responseMap['path']}');
+//                          print('Query: ${responseMap['query']}');
+                        // print('Complete Url: $response');
+                        //  });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PesaPalPage(
+                                  userId: model.authenticatedUser.id,
+                                ),
+                          ),
+                        );
+                        //model.clearCart();
                       },
                     ),
                   ),
@@ -101,4 +124,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
       ),
     );
   }
+
+
 }
