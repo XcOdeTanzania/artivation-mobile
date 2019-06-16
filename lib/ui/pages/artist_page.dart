@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image/network.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:connectivity/connectivity.dart';
 
 class ArtistPage extends StatefulWidget {
   final MainModel model;
@@ -16,21 +17,111 @@ class ArtistPage extends StatefulWidget {
 }
 
 class _ArtistState extends State<ArtistPage> {
+  bool _hasError = false;
+  bool _noNetwork = false;
+  bool _shoLoading = false;
+
+  double _height;
+
+//  var connectivityResult =  Connectivity().checkConnectivity();
   @override
   void initState() {
-    widget.model.fetchArtists();
+    Connectivity().checkConnectivity().then((value) {
+      if (value == ConnectivityResult.none)
+        setState(() {
+          _noNetwork = true;
+        });
+      else {
+        setState(() {
+          _shoLoading = true;
+        });
+        widget.model.fetchArtists().then((response) {
+          setState(() {
+            _shoLoading = false;
+            if (response.containsKey('error')) _hasError = true;
+            if (response.containsKey('noInternet')) _noNetwork = true;
+          });
+        });
+      }
+    });
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    _height = MediaQuery.of(context).size.height / 3;
     Future<Null> _handleRefresh() async {
-      widget.model.fetchArtists();
-      print(widget.model.getArtists().length);
+      Connectivity().checkConnectivity().then((value) {
+        if (value == ConnectivityResult.mobile ||
+            value == ConnectivityResult.wifi) {
+          setState(() {
+            _shoLoading = true;
+          });
+          widget.model.fetchArtists().then((response) {
+            setState(() {
+              _shoLoading = false;
+              if (response.containsKey('error'))
+                _hasError = true;
+              else
+                _hasError = false;
+              if (response.containsKey('noInternet'))
+                _noNetwork = true;
+              else
+                _noNetwork = false;
+            });
+          });
+        } else {
+          setState(() {
+            _noNetwork = true;
+          });
+        }
+      });
+//      print(widget.model.getArtists().length);
     }
 
-    Widget _content = ListView(
-      children: <Widget>[Center(child: Text('No Artist Found!'))],
+    Widget _listEmptyWidget = ListView(
+      children: <Widget>[
+        SizedBox(
+          height: _height,
+        ),
+        Center(
+          child: Text('No Artist Found!'),
+        ),
+      ],
+    );
+
+    Widget _noNetworkWidget = ListView(
+      children: <Widget>[
+        SizedBox(
+          height: _height,
+        ),
+        Center(child: Text('No Internet!, Check your Internet connection'))
+      ],
+    );
+
+    Widget _loadingWidget = ListView(
+      children: <Widget>[
+        SizedBox(
+          height: _height,
+        ),
+        Center(
+          child: CircularProgressIndicator(
+            backgroundColor: UIData.primaryColor,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
+      ],
+    );
+
+    Widget _errorWidget = ListView(
+      children: <Widget>[
+        SizedBox(
+          height: _height,
+        ),
+        Center(
+            child: Text('Error Occured !, Make sure you connected to Internet'))
+      ],
     );
 
     Widget _buildListOfArtists(MainModel model) => ListView.builder(
@@ -82,7 +173,24 @@ class _ArtistState extends State<ArtistPage> {
 
     return ScopedModelDescendant(
       builder: (BuildContext context, Widget child, MainModel model) {
-        _content = _buildListOfArtists(model);
+//        if (_noNetwork)
+//          _content = ListView(
+//            children: <Widget>[
+//              Center(
+//                  child: Text('No Internet!, Check your Internet connection'))
+//            ],
+//          );
+//
+//        if (_hasError)
+//          _content = ListView(
+//            children: <Widget>[
+//              Center(
+//                  child: Text(
+//                      'Error Occured !, Make sure you connected to Internet'))
+//            ],
+//          );
+//        if (model.getArtists().length > 0)
+//          _content = _shoLoading ?  _buildListOfArtists(model);
         return Scaffold(
           appBar: AppBar(
             title: Text('Artists',
@@ -97,7 +205,15 @@ class _ArtistState extends State<ArtistPage> {
             showChildOpacityTransition: false,
             color: UIData.primaryColor,
 
-            child: _content, // scroll view
+            child: _shoLoading
+                ? _loadingWidget
+                : _noNetwork
+                    ? _noNetworkWidget
+                    : _hasError
+                        ? _errorWidget
+                        : model.getArtists().length > 0
+                            ? _buildListOfArtists(model)
+                            : _listEmptyWidget, // scroll view
           ),
         );
       },

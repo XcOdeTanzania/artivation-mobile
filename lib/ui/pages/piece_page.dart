@@ -9,11 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:badges/badges.dart';
+import 'package:connectivity/connectivity.dart';
 
 class PiecePage extends StatefulWidget {
   const PiecePage({Key key, this.model, this.menuController}) : super(key: key);
   final MainModel model;
   final MenuController menuController;
+
   @override
   PiecePageState createState() {
     return new PiecePageState(model, menuController);
@@ -23,10 +25,37 @@ class PiecePage extends StatefulWidget {
 class PiecePageState extends State<PiecePage> {
   final MainModel _model;
   final MenuController _menuController;
+  bool _showLoading = false;
+  bool _hasError = false;
+  bool _noNetwork = false;
+  var connectivityResult =  Connectivity().checkConnectivity();
+
   PiecePageState(this._model, this._menuController);
+
   @override
   void initState() {
-    _model.fetchPieces(widget.model.authenticatedUser.id);
+    connectivityResult.then((value){
+      if (value == ConnectivityResult.mobile ||
+          value == ConnectivityResult.wifi) {
+        setState(() {
+          _showLoading = true;
+        });
+        _model.fetchPieces(widget.model.authenticatedUser.id).then((response) {
+          setState(() {
+            _showLoading = false;
+            if (response.containsKey('error')) _hasError = true;
+          });
+        });
+      } else {
+        setState(() {
+          _showLoading = false;
+          _hasError = true;
+          _noNetwork = true;
+        });
+      }
+    });
+
+
     super.initState();
   }
 
@@ -35,7 +64,16 @@ class PiecePageState extends State<PiecePage> {
   @override
   Widget build(BuildContext context) {
     Future<Null> _handleRefresh() async {
-      _model.fetchPieces(widget.model.authenticatedUser.id);
+      setState(() {
+        _showLoading = true;
+      });
+      _model.fetchPieces(widget.model.authenticatedUser.id).then((response) {
+        setState(() {
+          _showLoading = false;
+          if (response.containsKey('error')) _hasError = true;
+          if(response.containsKey('noInternet')) _noNetwork = true;
+        });
+      });
     }
 
     return ScopedModelDescendant(
@@ -127,42 +165,61 @@ class PiecePageState extends State<PiecePage> {
             ),
           ),
           body: LiquidPullToRefresh(
-            onRefresh: _handleRefresh,
-            color: UIData.primaryColor,
-            showChildOpacityTransition: false,
-            child: model.getPieces().length > 0
-                ? ListView.builder(
-                    itemCount: model.getPieces().length,
-                    itemExtent: PieceItem.height,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        margin: const EdgeInsets.only(
-                            top: 8.0, left: 8.0, right: 8.0),
-                        child: PieceItem(
-                          piece: model.getPieces()[index],
-                          shape: _shape,
+              onRefresh: _handleRefresh,
+              color: UIData.primaryColor,
+              showChildOpacityTransition: false,
+              child: !_showLoading
+                  ? model.getPieces().length > 0
+                      ? ListView.builder(
+                          itemCount: model.getPieces().length,
+                          itemExtent: PieceItem.height,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: const EdgeInsets.only(
+                                  top: 8.0, left: 8.0, right: 8.0),
+                              child: PieceItem(
+                                piece: model.getPieces()[index],
+                                shape: _shape,
+                              ),
+                            );
+                          },
+                        )
+                      : ListView(
+                          children: <Widget>[
+                            SizedBox(
+                              height: _height,
+                            ),
+                            Center(
+                              child: _noNetwork ? Text(
+                                    ' NO INTERNET CONNECTION ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ): _hasError ? Text(
+                                model.selectedCategory
+                                    .toString()
+                                    .replaceAll('Category.', '')
+                                    .toUpperCase() +
+                                    ' HAS NO DATA YET',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ):  Text( ' ERROR OCCURED, CHECK YOUR INTERNET ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            )
+                          ],
+                        )
+                  : ListView(
+                      children: <Widget>[
+                        SizedBox(
+                          height: _height,
                         ),
-                      );
-                    },
-                  )
-                : ListView(
-                    children: <Widget>[
-                      SizedBox(
-                        height: _height,
-                      ),
-                      Center(
-                        child: Text(
-                          model.selectedCategory
-                                  .toString()
-                                  .replaceAll('Category.', '')
-                                  .toUpperCase() +
-                              ' HAS NO DATA YET',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor: UIData.primaryColor,
+                            valueColor:  AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
                         ),
-                      )
-                    ],
-                  ), // scroll view
-          ),
+                      ],
+                    ) // scroll view
+              ),
           drawer: DrawerPage(),
         );
       },

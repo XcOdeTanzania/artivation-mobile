@@ -6,6 +6,7 @@ import 'package:artivation/utils/ui_data.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:connectivity/connectivity.dart';
 
 class PurchasedGridList extends StatefulWidget {
   const PurchasedGridList({Key key, this.model}) : super(key: key);
@@ -18,17 +19,50 @@ class PurchasedGridList extends StatefulWidget {
 class PurchasedGridListState extends State<PurchasedGridList> {
   GridTileStyle _tileStyle = GridTileStyle.oneLine;
 
+  bool _noNetwork = false;
+  bool _hasError = false;
+  bool _showLoading = false;
+  double _height ;
+  var connectivityResult =  Connectivity().checkConnectivity();
+  void fetchData(){
+    widget.model.fetchPurchasedPieces(widget.model.authenticatedUser.id);
+    connectivityResult.then((value){
+      if (value == ConnectivityResult.mobile ||
+          value == ConnectivityResult.wifi) {
+        setState(() {
+          _showLoading = true;
+        });
+        widget.model.fetchPurchasedPieces(widget.model.authenticatedUser.id).then((response) {
+          setState(() {
+            _showLoading = false;
+            if (response.containsKey('error')) _hasError = true;
+            if(response.containsKey('noInternet')) _noNetwork = true;
+          });
+        });
+      } else {
+        setState(() {
+          _showLoading = false;
+          _hasError = false;
+          _noNetwork = true;
+        });
+      }
+    });
+  }
+
   @override
   void initState() {
-    widget.model.fetchPurchasedPieces(widget.model.authenticatedUser.id);
+    //widget.model.fetchPurchasedPieces(widget.model.authenticatedUser.id);
+    fetchData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
+    _height = MediaQuery.of(context).size.height/3;
     Future<Null> _handleRefresh() async {
-    widget.model.fetchPurchasedPieces(widget.model.authenticatedUser.id);
+    //widget.model.fetchPurchasedPieces(widget.model.authenticatedUser.id);
+      fetchData();
     }
 
     return ScopedModelDescendant(
@@ -42,11 +76,27 @@ class PurchasedGridListState extends State<PurchasedGridList> {
                     fontFamily: "WorkSansSemiBold")),
             backgroundColor: UIData.primaryColor,
           ),
-          body: LiquidPullToRefresh(
+          body: _showLoading ?
+          ListView(
+            children: <Widget>[
+              SizedBox(
+                height: _height,
+              ),
+              Center(
+                child: CircularProgressIndicator(
+                  backgroundColor: UIData.primaryColor,
+                  valueColor:  AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            ],
+          )
+              : LiquidPullToRefresh(
             onRefresh: _handleRefresh,
             color: UIData.primaryColor,
             showChildOpacityTransition: false,
-            child: GridView.builder(
+            child:
+            model.gePurchasedPieces().length >0 ?
+            GridView.builder(
               itemCount: model.gePurchasedPieces().length,
               itemBuilder: (context, index) {
                 return GridPieceItem(
@@ -65,7 +115,21 @@ class PurchasedGridListState extends State<PurchasedGridList> {
                   childAspectRatio:
                       (orientation == Orientation.portrait) ? 1.0 : 1.3),
               padding: const EdgeInsets.all(4.0),
-            ), // scroll view
+            ):
+            ListView(
+              children: <Widget>[
+                SizedBox(
+                  height: _height,
+                ),
+                Center(
+                  child: _noNetwork ? Text('NO INTERNET CONNECTION,CHECK YOUR INTERNET'):
+                      _hasError ? Text('ERROR OCCURED') :
+                      Text('YOU DON\'T HAVE PURCHESED ITEMS'),
+
+                ),
+              ],
+            )
+            , // scroll view
           ),
         );
       },

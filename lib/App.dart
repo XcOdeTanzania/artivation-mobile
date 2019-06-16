@@ -5,6 +5,8 @@ import 'package:artivation/ui/zoom_scafford.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
+import 'ui/pages/pay_with_pesapal_page.dart';
+
 class App extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -46,7 +48,8 @@ class AppState extends State<App> {
                 )
               : LoginPage(
                   model: _model,
-                )
+                ),
+          'payment': (BuildContext context) => PesaPalPage()
         },
       ),
       model: _model,

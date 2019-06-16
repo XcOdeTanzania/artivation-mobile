@@ -75,7 +75,7 @@ class GridPieceItem extends StatelessWidget {
               title: GridTitleText(piece.title),
               backgroundColor: Colors.black45,
               leading: Icon(
-                model.getPieceById(piece.id).isFavorite
+               piece.isFavorite// model.getPieceById(piece.id).isFavorite
                     ? Icons.favorite
                     : Icons.favorite_border,
                 color: UIData.primaryColor,
@@ -108,6 +108,6 @@ class GridPieceItem extends StatelessWidget {
         );
     }
     assert(tileStyle != null);
-    return null;
+    return image;
   }
 }

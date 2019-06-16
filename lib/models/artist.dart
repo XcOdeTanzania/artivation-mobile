@@ -30,7 +30,7 @@ class Artist {
         numberOfPieces = map['number_of_pieces'],
         numberOfPiecesBought = map['number_of_pieces_bought'],
         numberOfLikes = map['number_of_likes'],
-        ratings = map['ratings'].toDouble(),
+        ratings = map['ratings'] != null ? map['ratings'].toDouble() : 0.0,
         categories = <Category>[
           Category.beaches,
           Category.grafitti,

@@ -49,7 +49,7 @@ class Piece {
         category = Category.values[map['category_id']],
         isFavorite = map['like_status'],
         likeCounts = map['like_counts'],
-        cartStatus = map['cart_status'];
+        cartStatus = map['cart_status'] is bool ? map['cart_status'] : map['cart_status'] == 0 ? false : true;
 
 
 }

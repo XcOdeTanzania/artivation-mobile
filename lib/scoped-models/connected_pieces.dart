@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:rxdart/subjects.dart';
+import 'dart:io';
 
 double _salesTaxRate = 0.06;
 double _shippingCostPerItem = 7.0;
@@ -351,26 +352,33 @@ mixin PieceModel on ConnectedPiecesModel {
   }
 
   // Loads the list of available products from the repo.
-  Future<void> fetchPieces(int userId) async {
-
-    print(api + "pieces/" + userId.toString());
+  Future<Map<String,dynamic>> fetchPieces(int userId) async {
+    Map<String,dynamic> requestResponse = Map();
+    //print(api + "pieces/" + userId.toString());
     final List<Piece> _fetchedPieces = [];
     try {
       final http.Response response =
           await http.get(api + "pieces/" + userId.toString());
 
       final Map<String, dynamic> data = json.decode(response.body);
-      print('MMMMMMMMMMMMMMMMMMHHHHHHHHHHHHHHHH');
-       print( data['pieces']);
+
+      //print('MMMMMMMMMMMMMMMMMMHHHHHHHHHHHHHHHH');
+      //print( data['pieces']);
+
+      requestResponse.putIfAbsent('status', ()=> response.statusCode);
       data['pieces'].forEach((pieceData) {
         final piece = Piece.fromMap(pieceData);
       
         _fetchedPieces.add(piece);
       });
      
-    } catch (error) {
-      print(error
-      );
+    } on SocketException catch (_) {
+      requestResponse.putIfAbsent('noInternet', ()=> true);
+    }
+    catch (error) {
+      //print(error);
+      requestResponse.putIfAbsent('error', ()=> true);
+
     }
     _availablePieces = _fetchedPieces;
     _piecesInCart.clear();
@@ -384,6 +392,8 @@ mixin PieceModel on ConnectedPiecesModel {
     });
     print(_availablePieces);
     notifyListeners();
+
+    return requestResponse;
   }
 
   Future<void> setCategory(Category newCategory) async {
@@ -392,23 +402,34 @@ mixin PieceModel on ConnectedPiecesModel {
   }
 
   //fetch purchased pieces
-  Future<void> fetchPurchasedPieces(int userId) async {
+  Future<Map<String,dynamic>> fetchPurchasedPieces(int userId) async {
     final List<Piece> _fetchedPurchasedPieces = [];
+    Map<String,dynamic> responseMap = Map();
     try {
       final http.Response response =
           await http.get(api + "pieces/purchased/" + userId.toString());
       final Map<String, dynamic> data = json.decode(response.body);
      print(data);
-     
+
+     responseMap.putIfAbsent('status', ()=>response.statusCode);
+
       data['pieces'].forEach((pieceData) {
         final piece = Piece.fromMap(pieceData);
         _fetchedPurchasedPieces.add(piece);
       });
-    } catch (error) {
-      print("noooooooooooooooooooo");
+
+    } on SocketException catch(_){
+      responseMap.putIfAbsent('noInternet', ()=>true);
+    }
+    catch (error) {
+      responseMap.putIfAbsent('hasError', ()=>true);
+//      print('************ --- ERROR --- ********');
+//      print(error);
     }
     _purchasedPieces = _fetchedPurchasedPieces;
     notifyListeners();
+
+    return responseMap;
   }
 }
 
@@ -568,19 +589,31 @@ mixin ArtistModel on ConnectedPiecesModel {
   }
 
   // Loads the list of available artists from the repo.
-  Future<void> fetchArtists() async {
+  Future<Map<String,dynamic>> fetchArtists() async {
     final List<Artist> _fetchedArtists = [];
+    Map<String,dynamic> requestResponse = Map();
+    http.Response  resp;
     try {
       final http.Response response = await http.get(api + "artists");
+      resp = response;
       final Map<String, dynamic> data = json.decode(response.body);
-
+      requestResponse.putIfAbsent('status', ()=>  response.statusCode);
       data['artists'].forEach((artistData) {
         final artist = Artist.fromMap(artistData);
         _fetchedArtists.add(artist);
       });
-    } catch (error) {}
+    } on SocketException catch(_){
+      requestResponse.putIfAbsent('noInternet', ()=>  true);
+    }
+    catch (error) {
+      requestResponse.putIfAbsent('error', ()=>  true);
+      print('Ooh No error ! status= ${resp.statusCode}');
+      print(error);
+    }
     _availableArtists = _fetchedArtists;
     //_availablePieces = PieceRepository.loadPieces(Category.all);
     notifyListeners();
+
+    return requestResponse;
   }
 }
