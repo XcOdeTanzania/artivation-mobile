@@ -57,6 +57,7 @@ class _LoginPageState extends State<LoginPage>
       body: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: (overscroll) {
           overscroll.disallowGlow();
+          return;
         },
         child: SingleChildScrollView(
           child: Container(
@@ -255,9 +256,12 @@ class _LoginPageState extends State<LoginPage>
                                     if (value.isEmpty) {
                                       return 'Please enter email';
                                     }
-                                    if(!RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                                    if (!RegExp(
+                                            r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
                                         .hasMatch(value))
                                       return 'Invalid Email';
+
+                                    return '';
                                   },
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
@@ -296,6 +300,7 @@ class _LoginPageState extends State<LoginPage>
                                     if (value.isEmpty) {
                                       return 'Please enter password';
                                     }
+                                    return '';
                                   },
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
@@ -476,7 +481,6 @@ class _LoginPageState extends State<LoginPage>
                       Padding(
                         padding: EdgeInsets.only(top: 10.0, right: 40.0),
                         child: GestureDetector(
-                          // TODO: Sign in with facebook
                           onTap: () =>
                               showInSnackBar("Facebook button pressed"),
                           child: Container(
@@ -495,10 +499,8 @@ class _LoginPageState extends State<LoginPage>
                       Padding(
                         padding: EdgeInsets.only(top: 10.0),
                         child: GestureDetector(
-                          // TODO: Sign in with google
-                          //onTap: () => showInSnackBar("Google button pressed"),
-                          onTap: (){
-                            GoogleSignIn _googleSignIn = GoogleSignIn(
+                          onTap: () {
+                            GoogleSignIn(
                               scopes: [
                                 'email',
                                 'https://www.googleapis.com/auth/contacts.readonly',
@@ -581,6 +583,7 @@ class _LoginPageState extends State<LoginPage>
                                   if (value.isEmpty) {
                                     return 'Please enter your name';
                                   }
+                                  return '';
                                 },
                               ),
                             ),
@@ -618,9 +621,10 @@ class _LoginPageState extends State<LoginPage>
                                   if (value.isEmpty) {
                                     return 'Please enter  an email';
                                   }
-                                  if(!RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-                                      .hasMatch(value))
-                                    return 'Invalid Email';
+                                  if (!RegExp(
+                                          r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                                      .hasMatch(value)) return 'Invalid Email';
+                                  return '';
                                 },
                               ),
                             ),
@@ -668,6 +672,7 @@ class _LoginPageState extends State<LoginPage>
                                   if (value.isEmpty) {
                                     return 'Please enter password';
                                   }
+                                  return '';
                                 },
                               ),
                             ),
@@ -714,6 +719,7 @@ class _LoginPageState extends State<LoginPage>
                                   if (value.isEmpty) {
                                     return 'Please enter password';
                                   }
+                                  return '';
                                 },
                               ),
                             ),

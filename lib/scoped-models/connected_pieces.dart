@@ -40,7 +40,6 @@ mixin ConnectedPiecesModel on Model {
 
   // The IDs and quantities of products currently in the cart.
   final Map<int, int> _piecesInCart = <int, int>{};
-  
 
   List<Piece> getPieces() {
     if (_availablePieces == null) {
@@ -297,7 +296,7 @@ mixin PieceModel on ConnectedPiecesModel {
     };
 
     try {
-      http.Response response = await http.post(
+      await http.post(
         api + "like",
         body: json.encode(updatePieceLikesStatus),
         headers: {'Content-Type': 'application/json'},
@@ -352,9 +351,9 @@ mixin PieceModel on ConnectedPiecesModel {
   }
 
   // Loads the list of available products from the repo.
-  Future<Map<String,dynamic>> fetchPieces(int userId) async {
-    Map<String,dynamic> requestResponse = Map();
-    //print(api + "pieces/" + userId.toString());
+  Future<Map<String, dynamic>> fetchPieces(int userId) async {
+    Map<String, dynamic> requestResponse = Map();
+
     final List<Piece> _fetchedPieces = [];
     try {
       final http.Response response =
@@ -362,23 +361,16 @@ mixin PieceModel on ConnectedPiecesModel {
 
       final Map<String, dynamic> data = json.decode(response.body);
 
-      //print('MMMMMMMMMMMMMMMMMMHHHHHHHHHHHHHHHH');
-      //print( data['pieces']);
-
-      requestResponse.putIfAbsent('status', ()=> response.statusCode);
+      requestResponse.putIfAbsent('status', () => response.statusCode);
       data['pieces'].forEach((pieceData) {
         final piece = Piece.fromMap(pieceData);
-      
+
         _fetchedPieces.add(piece);
       });
-     
     } on SocketException catch (_) {
-      requestResponse.putIfAbsent('noInternet', ()=> true);
-    }
-    catch (error) {
-      //print(error);
-      requestResponse.putIfAbsent('error', ()=> true);
-
+      requestResponse.putIfAbsent('noInternet', () => true);
+    } catch (error) {
+      requestResponse.putIfAbsent('error', () => true);
     }
     _availablePieces = _fetchedPieces;
     _piecesInCart.clear();
@@ -390,7 +382,7 @@ mixin PieceModel on ConnectedPiecesModel {
         _piecesInCart[photoIndex] = 1;
       }
     });
-    print(_availablePieces);
+
     notifyListeners();
 
     return requestResponse;
@@ -402,29 +394,24 @@ mixin PieceModel on ConnectedPiecesModel {
   }
 
   //fetch purchased pieces
-  Future<Map<String,dynamic>> fetchPurchasedPieces(int userId) async {
+  Future<Map<String, dynamic>> fetchPurchasedPieces(int userId) async {
     final List<Piece> _fetchedPurchasedPieces = [];
-    Map<String,dynamic> responseMap = Map();
+    Map<String, dynamic> responseMap = Map();
     try {
       final http.Response response =
           await http.get(api + "pieces/purchased/" + userId.toString());
       final Map<String, dynamic> data = json.decode(response.body);
-     print(data);
 
-     responseMap.putIfAbsent('status', ()=>response.statusCode);
+      responseMap.putIfAbsent('status', () => response.statusCode);
 
       data['pieces'].forEach((pieceData) {
         final piece = Piece.fromMap(pieceData);
         _fetchedPurchasedPieces.add(piece);
       });
-
-    } on SocketException catch(_){
-      responseMap.putIfAbsent('noInternet', ()=>true);
-    }
-    catch (error) {
-      responseMap.putIfAbsent('hasError', ()=>true);
-//      print('************ --- ERROR --- ********');
-//      print(error);
+    } on SocketException catch (_) {
+      responseMap.putIfAbsent('noInternet', () => true);
+    } catch (error) {
+      responseMap.putIfAbsent('hasError', () => true);
     }
     _purchasedPieces = _fetchedPurchasedPieces;
     notifyListeners();
@@ -441,7 +428,7 @@ mixin CartModel on ConnectedPiecesModel {
       _piecesInCart.values.fold(0, (int v, int e) => v + e);
 
   // Totaled prices of the items in the cart.
-  double get subtotalCost { 
+  double get subtotalCost {
     return _piecesInCart.keys
         .map((int id) => _availablePieces[id].price * _piecesInCart[id])
         .fold(0.0, (double sum, int e) => sum + e);
@@ -492,7 +479,7 @@ mixin CartModel on ConnectedPiecesModel {
     };
 
     try {
-      http.Response response = await http.post(
+      await http.post(
         api + "piece/cart",
         body: json.encode(updatePieceCartStatus),
         headers: {'Content-Type': 'application/json'},
@@ -589,29 +576,28 @@ mixin ArtistModel on ConnectedPiecesModel {
   }
 
   // Loads the list of available artists from the repo.
-  Future<Map<String,dynamic>> fetchArtists() async {
+  Future<Map<String, dynamic>> fetchArtists() async {
     final List<Artist> _fetchedArtists = [];
-    Map<String,dynamic> requestResponse = Map();
-    http.Response  resp;
+    Map<String, dynamic> requestResponse = Map();
+    http.Response resp;
     try {
       final http.Response response = await http.get(api + "artists");
       resp = response;
       final Map<String, dynamic> data = json.decode(response.body);
-      requestResponse.putIfAbsent('status', ()=>  response.statusCode);
+      requestResponse.putIfAbsent('status', () => response.statusCode);
       data['artists'].forEach((artistData) {
         final artist = Artist.fromMap(artistData);
         _fetchedArtists.add(artist);
       });
-    } on SocketException catch(_){
-      requestResponse.putIfAbsent('noInternet', ()=>  true);
-    }
-    catch (error) {
-      requestResponse.putIfAbsent('error', ()=>  true);
+    } on SocketException catch (_) {
+      requestResponse.putIfAbsent('noInternet', () => true);
+    } catch (error) {
+      requestResponse.putIfAbsent('error', () => true);
       print('Ooh No error ! status= ${resp.statusCode}');
       print(error);
     }
     _availableArtists = _fetchedArtists;
-    //_availablePieces = PieceRepository.loadPieces(Category.all);
+
     notifyListeners();
 
     return requestResponse;
