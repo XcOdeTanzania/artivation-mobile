@@ -150,7 +150,7 @@ class _MenuScreenState extends State<MenuScreen> with TickerProviderStateMixin {
         }
       }
 
-      return new Container(
+      return Container(
         width: double.infinity,
         height: double.infinity,
         decoration: new BoxDecoration(

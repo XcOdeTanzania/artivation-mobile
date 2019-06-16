@@ -16,12 +16,12 @@ class ProfileTile extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Text(
-          title,
+          title.toString(),
           style: TextStyle(
               fontSize: 15.0, fontWeight: FontWeight.bold, color: textColor),
         ),
         Text(
-          subtitle,
+          subtitle.toString(),
           style: TextStyle(
               fontSize: 15.0, fontWeight: FontWeight.normal, color: textColor),
         )

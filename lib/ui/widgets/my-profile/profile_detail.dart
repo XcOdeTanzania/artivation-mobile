@@ -76,7 +76,7 @@ class ProfileDetail extends StatelessWidget {
             Icons.phone,
             color: UIData.primaryColor,
           ),
-          title: Text(model.authenticatedUser.phone),
+          title: Text(model.authenticatedUser.phone != null ? model.authenticatedUser.phone: 'Insert Phone number'),
           trailing: Icon(
             Icons.edit,
             color: UIData.primaryColor,
@@ -91,7 +91,7 @@ class ProfileDetail extends StatelessWidget {
             Icons.people_outline,
             color: UIData.primaryColor,
           ),
-          title: Text(model.authenticatedUser.sex),
+          title: Text(model.authenticatedUser.sex != null ? model.authenticatedUser.sex : 'Set your sex'),
           trailing: Icon(
             Icons.edit,
             color: UIData.primaryColor,

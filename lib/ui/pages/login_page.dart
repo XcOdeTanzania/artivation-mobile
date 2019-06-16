@@ -2,6 +2,7 @@ import 'package:artivation/scoped-models/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:artivation/style/theme.dart' as Theme;
 import 'package:artivation/utils/bubble_indication_painter.dart';
@@ -35,6 +36,8 @@ class _LoginPageState extends State<LoginPage>
   bool _obscureTextLogin = true;
   bool _obscureTextSignup = true;
   bool _obscureTextSignupConfirm = true;
+
+  bool _showLoading = false;
 
   TextEditingController signupEmailController = TextEditingController();
   TextEditingController signupNameController = TextEditingController();
@@ -252,6 +255,9 @@ class _LoginPageState extends State<LoginPage>
                                     if (value.isEmpty) {
                                       return 'Please enter email';
                                     }
+                                    if(!RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                                        .hasMatch(value))
+                                      return 'Invalid Email';
                                   },
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
@@ -352,7 +358,7 @@ class _LoginPageState extends State<LoginPage>
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 10.0, horizontal: 42.0),
-                              child: widget.model.isLoading
+                              child: _showLoading //widget.model.isLoading
                                   ? CircularProgressIndicator(
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                           Colors.white),
@@ -369,10 +375,16 @@ class _LoginPageState extends State<LoginPage>
                               if (_formKey.currentState.validate()) {
                                 if (loginEmailController.text.isNotEmpty &&
                                     loginPasswordController.text.isNotEmpty) {
+                                  setState(() {
+                                    _showLoading = true;
+                                  });
                                   model
                                       .signInUser(loginEmailController.text,
                                           loginPasswordController.text)
                                       .then((val) {
+                                    setState(() {
+                                      _showLoading = false;
+                                    });
                                     if (!val) {
                                       loginEmailController.clear();
                                       loginPasswordController.clear();
@@ -464,6 +476,7 @@ class _LoginPageState extends State<LoginPage>
                       Padding(
                         padding: EdgeInsets.only(top: 10.0, right: 40.0),
                         child: GestureDetector(
+                          // TODO: Sign in with facebook
                           onTap: () =>
                               showInSnackBar("Facebook button pressed"),
                           child: Container(
@@ -482,7 +495,16 @@ class _LoginPageState extends State<LoginPage>
                       Padding(
                         padding: EdgeInsets.only(top: 10.0),
                         child: GestureDetector(
-                          onTap: () => showInSnackBar("Google button pressed"),
+                          // TODO: Sign in with google
+                          //onTap: () => showInSnackBar("Google button pressed"),
+                          onTap: (){
+                            GoogleSignIn _googleSignIn = GoogleSignIn(
+                              scopes: [
+                                'email',
+                                'https://www.googleapis.com/auth/contacts.readonly',
+                              ],
+                            );
+                          },
                           child: Container(
                             padding: const EdgeInsets.all(15.0),
                             decoration: BoxDecoration(
@@ -508,7 +530,7 @@ class _LoginPageState extends State<LoginPage>
   Widget _buildSignUp(BuildContext context) {
     return ScopedModelDescendant(
       builder: (BuildContext context, Widget child, MainModel model) {
-        return Container(
+        return SingleChildScrollView(
           padding: EdgeInsets.only(top: 23.0),
           child: Form(
             key: _signupFormKey,
@@ -596,6 +618,9 @@ class _LoginPageState extends State<LoginPage>
                                   if (value.isEmpty) {
                                     return 'Please enter  an email';
                                   }
+                                  if(!RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                                      .hasMatch(value))
+                                    return 'Invalid Email';
                                 },
                               ),
                             ),
@@ -729,7 +754,7 @@ class _LoginPageState extends State<LoginPage>
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 10.0, horizontal: 42.0),
-                            child: widget.model.isLoading
+                            child: _showLoading //widget.model.isLoading
                                 ? CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                         Colors.white),
@@ -748,12 +773,18 @@ class _LoginPageState extends State<LoginPage>
                                   signupConfirmPasswordController.text) {
                                 if (signupEmailController.text.isNotEmpty &&
                                     signupNameController.text.isNotEmpty) {
+                                  setState(() {
+                                    _showLoading = true;
+                                  });
                                   model
                                       .signUpUser(
                                           signupNameController.text,
                                           signupEmailController.text,
                                           signupPasswordController.text)
                                       .then((val) {
+                                    setState(() {
+                                      _showLoading = false;
+                                    });
                                     if (!val) {
                                       loginEmailController.clear();
                                       loginPasswordController.clear();
