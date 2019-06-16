@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:artivation/api/api.dart';
 import 'package:artivation/models/artist.dart';
 import 'package:artivation/models/piece.dart';
@@ -418,7 +420,7 @@ mixin CartModel on ConnectedPiecesModel {
       _piecesInCart.values.fold(0, (int v, int e) => v + e);
 
   // Totaled prices of the items in the cart.
-  double get subtotalCost {
+  double get subtotalCost { 
     return _piecesInCart.keys
         .map((int id) => _availablePieces[id].price * _piecesInCart[id])
         .fold(0.0, (double sum, int e) => sum + e);
