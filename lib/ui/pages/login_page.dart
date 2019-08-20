@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 
 import 'package:artivation/style/theme.dart' as Theme;
 import 'package:artivation/utils/bubble_indication_painter.dart';
@@ -21,12 +22,13 @@ class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
-  final _signupFormKey = GlobalKey<FormState>();
+  final _signUpFormKey = GlobalKey<FormState>();
 
   final FocusNode myFocusNodeEmailLogin = FocusNode();
   final FocusNode myFocusNodePasswordLogin = FocusNode();
 
   final FocusNode myFocusNodePassword = FocusNode();
+  final FocusNode myFocusNodeConfirmPassword = FocusNode();
   final FocusNode myFocusNodeEmail = FocusNode();
   final FocusNode myFocusNodeName = FocusNode();
 
@@ -34,10 +36,12 @@ class _LoginPageState extends State<LoginPage>
   TextEditingController loginPasswordController = TextEditingController();
 
   bool _obscureTextLogin = true;
-  bool _obscureTextSignup = true;
-  bool _obscureTextSignupConfirm = true;
+  bool _obscureTextSignUp = true;
+  bool _obscureTextSignUpConfirm = true;
 
   bool _showLoading = false;
+
+  bool _skipValidation = false;
 
   TextEditingController signupEmailController = TextEditingController();
   TextEditingController signupNameController = TextEditingController();
@@ -57,6 +61,7 @@ class _LoginPageState extends State<LoginPage>
       body: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: (overscroll) {
           overscroll.disallowGlow();
+          return ;
         },
         child: SingleChildScrollView(
           child: Container(
@@ -165,6 +170,23 @@ class _LoginPageState extends State<LoginPage>
     ));
   }
 
+  /// Sign in with Google
+  GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
+
+  /// Implementing Signing with GooGle
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      await _googleSignIn.signIn();
+    } catch (error) {
+      print(error);
+    }
+  }
+  
   Widget _buildMenuBar(BuildContext context) {
     return Container(
       width: 300.0,
@@ -234,7 +256,7 @@ class _LoginPageState extends State<LoginPage>
                         ),
                         child: Container(
                           width: 300.0,
-                          height: 230.0,
+                          height: 250.0,
                           child: Column(
                             children: <Widget>[
                               Padding(
@@ -247,17 +269,24 @@ class _LoginPageState extends State<LoginPage>
                                   focusNode: myFocusNodeEmailLogin,
                                   controller: loginEmailController,
                                   keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  onFieldSubmitted: (String value){
+                                    FocusScope.of(context).requestFocus(myFocusNodePasswordLogin);
+                                  },
                                   style: TextStyle(
                                       fontFamily: "WorkSansSemiBold",
                                       fontSize: 16.0,
                                       color: Colors.black),
                                   validator: (value) {
                                     if (value.isEmpty) {
+                                      FocusScope.of(context).requestFocus(myFocusNodeEmailLogin);
                                       return 'Please enter email';
                                     }
-                                    if(!RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                                    if (!RegExp(
+                                            r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
                                         .hasMatch(value))
                                       return 'Invalid Email';
+                                    return null;
                                   },
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
@@ -288,14 +317,20 @@ class _LoginPageState extends State<LoginPage>
                                   focusNode: myFocusNodePasswordLogin,
                                   controller: loginPasswordController,
                                   obscureText: _obscureTextLogin,
+                                  textInputAction: TextInputAction.send,
+                                  onFieldSubmitted: (String value){
+                                    _login(model);
+                                  },
                                   style: TextStyle(
                                       fontFamily: "WorkSansSemiBold",
                                       fontSize: 16.0,
                                       color: Colors.black),
                                   validator: (value) {
                                     if (value.isEmpty) {
+                                      FocusScope.of(context).requestFocus(myFocusNodePasswordLogin);
                                       return 'Please enter password';
                                     }
+                                    return null;
                                   },
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
@@ -326,7 +361,7 @@ class _LoginPageState extends State<LoginPage>
                         ),
                       ),
                       Container(
-                        margin: EdgeInsets.only(top: 170.0),
+                        margin: EdgeInsets.only(top: 180.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                           boxShadow: <BoxShadow>[
@@ -372,39 +407,7 @@ class _LoginPageState extends State<LoginPage>
                                     ),
                             ),
                             onPressed: () {
-                              if (_formKey.currentState.validate()) {
-                                if (loginEmailController.text.isNotEmpty &&
-                                    loginPasswordController.text.isNotEmpty) {
-                                  setState(() {
-                                    _showLoading = true;
-                                  });
-                                  model
-                                      .signInUser(loginEmailController.text,
-                                          loginPasswordController.text)
-                                      .then((val) {
-                                    setState(() {
-                                      _showLoading = false;
-                                    });
-                                    if (!val) {
-                                      loginEmailController.clear();
-                                      loginPasswordController.clear();
-                                      Navigator.pushReplacementNamed(
-                                          context, '/');
-                                    } else {
-                                      print('Error while singing in');
-                                      Scaffold.of(context)
-                                          .showSnackBar(SnackBar(
-                                              content: ListTile(
-                                        leading: Icon(
-                                          Icons.error,
-                                          color: Colors.red,
-                                        ),
-                                        title: Text('Wrong Password or Email '),
-                                      )));
-                                    }
-                                  });
-                                }
-                              }
+                              _login(model);
                             }),
                       ),
                     ],
@@ -475,49 +478,59 @@ class _LoginPageState extends State<LoginPage>
                     children: <Widget>[
                       Padding(
                         padding: EdgeInsets.only(top: 10.0, right: 40.0),
-                        child: GestureDetector(
-                          // TODO: Sign in with facebook
-                          onTap: () =>
-                              showInSnackBar("Facebook button pressed"),
-                          child: Container(
-                            padding: const EdgeInsets.all(15.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                            child: Icon(
-                              FontAwesomeIcons.facebookF,
-                              color: Color(0xFF0084ff),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 10.0),
-                        child: GestureDetector(
-                          // TODO: Sign in with google
-                          //onTap: () => showInSnackBar("Google button pressed"),
-                          onTap: (){
-                            GoogleSignIn _googleSignIn = GoogleSignIn(
-                              scopes: [
-                                'email',
-                                'https://www.googleapis.com/auth/contacts.readonly',
-                              ],
-                            );
+                        child: GoogleSignInButton(
+                          onPressed: () {
+                            // TODO: Sign in with google
+                            _handleGoogleSignIn();
+
                           },
-                          child: Container(
-                            padding: const EdgeInsets.all(15.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                            child: Icon(
-                              FontAwesomeIcons.google,
-                              color: Color(0xFF0084ff),
-                            ),
-                          ),
                         ),
-                      ),
+                      )
+//                      Padding(
+//                        padding: EdgeInsets.only(top: 10.0, right: 40.0),
+//                        child: GestureDetector(
+//                          // TODO: Sign in with facebook
+//                          onTap: () =>
+//                              showInSnackBar("Facebook button pressed"),
+//                          child: Container(
+//                            padding: const EdgeInsets.all(15.0),
+//                            decoration: BoxDecoration(
+//                              shape: BoxShape.circle,
+//                              color: Colors.white,
+//                            ),
+//                            child: Icon(
+//                              FontAwesomeIcons.facebookF,
+//                              color: Color(0xFF0084ff),
+//                            ),
+//                          ),
+//                        ),
+//                      ),
+//                      Padding(
+//                        padding: EdgeInsets.only(top: 10.0),
+//                        child: GestureDetector(
+//                          // TODO: Sign in with google
+//                          //onTap: () => showInSnackBar("Google button pressed"),
+//                          onTap: (){
+//                            GoogleSignIn _googleSignIn = GoogleSignIn(
+//                              scopes: [
+//                                'email',
+//                                'https://www.googleapis.com/auth/contacts.readonly',
+//                              ],
+//                            );
+//                          },
+//                          child: Container(
+//                            padding: const EdgeInsets.all(15.0),
+//                            decoration: BoxDecoration(
+//                              shape: BoxShape.circle,
+//                              color: Colors.white,
+//                            ),
+//                            child: Icon(
+//                              FontAwesomeIcons.google,
+//                              color: Color(0xFF0084ff),
+//                            ),
+//                          ),
+//                        ),
+//                      ),
                     ],
                   ),
                 ],
@@ -533,7 +546,7 @@ class _LoginPageState extends State<LoginPage>
         return SingleChildScrollView(
           padding: EdgeInsets.only(top: 23.0),
           child: Form(
-            key: _signupFormKey,
+            key: _signUpFormKey,
             child: Column(
               children: <Widget>[
                 Stack(
@@ -562,6 +575,10 @@ class _LoginPageState extends State<LoginPage>
                                 controller: signupNameController,
                                 keyboardType: TextInputType.text,
                                 textCapitalization: TextCapitalization.words,
+                                textInputAction: TextInputAction.next,
+                                onFieldSubmitted: (String value){
+                                  FocusScope.of(context).requestFocus(myFocusNodeEmail);
+                                },
                                 style: TextStyle(
                                     fontFamily: "WorkSansSemiBold",
                                     fontSize: 16.0,
@@ -578,9 +595,12 @@ class _LoginPageState extends State<LoginPage>
                                       fontSize: 16.0),
                                 ),
                                 validator: (value) {
+                                  if(_skipValidation) return null;
                                   if (value.isEmpty) {
+                                    FocusScope.of(context).requestFocus(myFocusNodeName);
                                     return 'Please enter your name';
                                   }
+                                  return null;
                                 },
                               ),
                             ),
@@ -599,6 +619,10 @@ class _LoginPageState extends State<LoginPage>
                                 focusNode: myFocusNodeEmail,
                                 controller: signupEmailController,
                                 keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                               onFieldSubmitted: (String value){
+                                  FocusScope.of(context).requestFocus(myFocusNodePassword);
+                                },
                                 style: TextStyle(
                                     fontFamily: "WorkSansSemiBold",
                                     fontSize: 16.0,
@@ -615,12 +639,17 @@ class _LoginPageState extends State<LoginPage>
                                       fontSize: 16.0),
                                 ),
                                 validator: (value) {
+                                  if(_skipValidation) return null;
                                   if (value.isEmpty) {
+                                    FocusScope.of(context).requestFocus(myFocusNodeEmail);
                                     return 'Please enter  an email';
                                   }
-                                  if(!RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-                                      .hasMatch(value))
-                                    return 'Invalid Email';
+                                  if (!RegExp(
+                                          r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                                      .hasMatch(value)){
+                                    FocusScope.of(context).requestFocus(myFocusNodeEmail);
+                                    return 'Invalid Email';}
+                                  return null;
                                 },
                               ),
                             ),
@@ -638,7 +667,11 @@ class _LoginPageState extends State<LoginPage>
                               child: TextFormField(
                                 focusNode: myFocusNodePassword,
                                 controller: signupPasswordController,
-                                obscureText: _obscureTextSignup,
+                                obscureText: _obscureTextSignUp,
+                                textInputAction: TextInputAction.next,
+                                onFieldSubmitted: (String value){
+                                  FocusScope.of(context).requestFocus(myFocusNodeConfirmPassword);
+                                },
                                 style: TextStyle(
                                     fontFamily: "WorkSansSemiBold",
                                     fontSize: 16.0,
@@ -656,7 +689,7 @@ class _LoginPageState extends State<LoginPage>
                                   suffixIcon: GestureDetector(
                                     onTap: _toggleSignup,
                                     child: Icon(
-                                      _obscureTextSignup
+                                      _obscureTextSignUp
                                           ? FontAwesomeIcons.eye
                                           : FontAwesomeIcons.eyeSlash,
                                       size: 15.0,
@@ -666,8 +699,10 @@ class _LoginPageState extends State<LoginPage>
                                 ),
                                 validator: (value) {
                                   if (value.isEmpty) {
+                                    FocusScope.of(context).requestFocus(myFocusNodePassword);
                                     return 'Please enter password';
                                   }
+                                  return null;
                                 },
                               ),
                             ),
@@ -684,7 +719,12 @@ class _LoginPageState extends State<LoginPage>
                                   right: 25.0),
                               child: TextFormField(
                                 controller: signupConfirmPasswordController,
-                                obscureText: _obscureTextSignupConfirm,
+                                obscureText: _obscureTextSignUpConfirm,
+                                focusNode: myFocusNodeConfirmPassword,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (String value){
+
+                                },
                                 style: TextStyle(
                                     fontFamily: "WorkSansSemiBold",
                                     fontSize: 16.0,
@@ -702,7 +742,7 @@ class _LoginPageState extends State<LoginPage>
                                   suffixIcon: GestureDetector(
                                     onTap: _toggleSignupConfirm,
                                     child: Icon(
-                                      _obscureTextSignupConfirm
+                                      _obscureTextSignUpConfirm
                                           ? FontAwesomeIcons.eye
                                           : FontAwesomeIcons.eyeSlash,
                                       size: 15.0,
@@ -712,8 +752,14 @@ class _LoginPageState extends State<LoginPage>
                                 ),
                                 validator: (value) {
                                   if (value.isEmpty) {
-                                    return 'Please enter password';
+                                    FocusScope.of(context).requestFocus(myFocusNodeConfirmPassword);
+                                    return 'Please Confirm password';
                                   }
+                                  if(signupPasswordController.text.compareTo(value) != 0){
+                                    FocusScope.of(context).requestFocus(myFocusNodeConfirmPassword);
+                                    return 'Password missmatch';
+                                  }
+                                  return null;
                                 },
                               ),
                             ),
@@ -722,7 +768,7 @@ class _LoginPageState extends State<LoginPage>
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(top: 340.0),
+                      margin: EdgeInsets.only(top: 350.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         boxShadow: <BoxShadow>[
@@ -768,7 +814,8 @@ class _LoginPageState extends State<LoginPage>
                                   ),
                           ),
                           onPressed: () {
-                            if (_signupFormKey.currentState.validate()) {
+                            _skipValidation = false;
+                            if (_signUpFormKey.currentState.validate()) {
                               if (signupPasswordController.text ==
                                   signupConfirmPasswordController.text) {
                                 if (signupEmailController.text.isNotEmpty &&
@@ -845,13 +892,52 @@ class _LoginPageState extends State<LoginPage>
 
   void _toggleSignup() {
     setState(() {
-      _obscureTextSignup = !_obscureTextSignup;
+      _obscureTextSignUp = !_obscureTextSignUp;
     });
   }
 
   void _toggleSignupConfirm() {
     setState(() {
-      _obscureTextSignupConfirm = !_obscureTextSignupConfirm;
+      _obscureTextSignUpConfirm = !_obscureTextSignUpConfirm;
     });
   }
+
+  //region Login user
+  /// Login user
+  void _login(MainModel model){
+    if (_formKey.currentState.validate()) {
+      if (loginEmailController.text.isNotEmpty &&
+          loginPasswordController.text.isNotEmpty) {
+        setState(() {
+          _showLoading = true;
+        });
+        model
+            .signInUser(loginEmailController.text,
+            loginPasswordController.text)
+            .then((val) {
+          setState(() {
+            _showLoading = false;
+          });
+          if (!val) {
+            loginEmailController.clear();
+            loginPasswordController.clear();
+            Navigator.pushReplacementNamed(
+                context, '/');
+          } else {
+            print('Error while singing in');
+            Scaffold.of(context)
+                .showSnackBar(SnackBar(
+                content: ListTile(
+                  leading: Icon(
+                    Icons.error,
+                    color: Colors.red,
+                  ),
+                  title: Text('Wrong Password or Email '),
+                )));
+          }
+        });
+      }
+    }
+  }
+//endregion
 }

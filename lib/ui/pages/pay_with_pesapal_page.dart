@@ -16,11 +16,13 @@ class PesaPalPage extends StatefulWidget {
 }
 
 class _PesaPalState extends State<PesaPalPage> {
-  final flutterWebviewPlugin = new FlutterWebviewPlugin();
+  final flutterWebViewPlugin = new FlutterWebviewPlugin();
+
+
 
   @override
   Widget build(BuildContext context) {
-    flutterWebviewPlugin.onUrlChanged.listen((String url) {
+    flutterWebViewPlugin.onUrlChanged.listen((String url) {
       if (url.contains('pesapalCallback')) {
         print('Don\'t go to $url ');
         Navigator.pushReplacement(context,

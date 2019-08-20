@@ -57,7 +57,7 @@ Widget profileStackView(BuildContext context, MainModel model) {
                 FlatButton(
                   child: ProfileTile(
                     title: 'cart',
-                    subtitle: "5",
+                    subtitle: '${model.cartPieces.length}',
                     iconColor: Colors.white,
                   ),
                   onPressed: () {
